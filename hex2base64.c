@@ -86,8 +86,8 @@ char* encode(const char* input) {
 
 uint8_t* decode(const char* input) {
   char* output = malloc(1000*sizeof(char));
-  uint8_t a = 0, b = 0, c = 0, d = 0;
-  uint8_t w = 0, x = 0, y = 0;
+  uint8_t a, b, c, d;
+  uint8_t w, x, y;
   uint32_t k = 0;
   uint32_t temp = 0;
 
