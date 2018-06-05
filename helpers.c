@@ -3,12 +3,12 @@
 const char alphabet[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
 // *** Helpers ***
-long hex(char a, char b) {
+uint8_t unhex(char a, char b) {
   char temp[] = {a, b};
   return strtol(temp, NULL, 16);
 }
 
-char* unhex(uint8_t a) {
+const char* hex(uint8_t a) {
   char* temp = malloc(sizeof(uint8_t));  
   if (!temp)
     return NULL;

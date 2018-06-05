@@ -7,13 +7,12 @@
 #include "helpers.c"
 
 char* encode(const char* input) {
-  uint32_t temp;
-  uint32_t k = 0;
+  char* output = malloc(sizeof(char) * 1000);
   uint8_t a, b, c;
   uint8_t w, x, y, z;
-  char* output;
+  uint32_t k = 0;
+  uint32_t temp = 0;
 
-  output = malloc(sizeof(char) * 1000);
   if (!output)
     return NULL;
 
@@ -21,15 +20,15 @@ char* encode(const char* input) {
     return "";
 
   if (strlen(input) & 1) {
-    printf("%s\n", "hex input is odd!");
+    printf("%s\n", "unhex input is odd!");
     exit(0);
   }
     
   // process at most 6 bytes per iteration
   for (uint32_t i = 0; i < (strlen(input)); i += 6) {
-    a = hex(input[i], input[i+1]);
-    b = hex(input[i+2], input[i+3]);
-    c = hex(input[i+4], input[i+5]);
+    a = unhex(input[i], input[i+1]);
+    b = unhex(input[i+2], input[i+3]);
+    c = unhex(input[i+4], input[i+5]);
 
     temp = (a << 24) | (b << 16) | (c << 8);
 
@@ -64,6 +63,9 @@ uint8_t* decode(const char* input) {
   uint8_t w, x, y;
   uint32_t k = 0;
   uint32_t temp = 0;
+
+  if (!output)
+    return NULL;
 
   if (strlen(input) <= 0)
       return "";
@@ -103,11 +105,11 @@ int main(int argc, char* argv[]) {
     exit(0);
   }
 
-  // Print hex to base64
+  // Print unhex to base64
   if (argc == 2)
     printf("%s\n", encode(argv[1]));
 
-  // Print base64 to hex
+  // Print base64 to unhex
   if (argc == 3) {
     if (strcmp(argv[1], "-d") == 0) {
       uint8_t* bytes = decode(argv[2]);
