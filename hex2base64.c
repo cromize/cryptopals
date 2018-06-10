@@ -1,4 +1,4 @@
-// hex to base64, by: cromize(2018)
+// hex to base64 and vice versa, by: cromize(2018)
 
 #include <stdio.h>
 #include <stdint.h>
@@ -6,26 +6,19 @@
 #include <stdlib.h>
 #include "helpers.c"
 
-char* encode(const char* input) {
-  char* output = malloc(sizeof(char) * 1000);
+int32_t encode(const char* input, char* output) {
+  char buf[DEFAULT_SIZE] = {0};
+  int32_t size = strlen(input);
   uint8_t a, b, c;
   uint8_t w, x, y, z;
   uint32_t k = 0;
   uint32_t temp = 0;
 
-  if (!output)
-    return NULL;
-
-  if (strlen(input) <= 0)
-    return "";
-
-  if (strlen(input) & 1) {
-    printf("%s\n", "unhex input is odd!");
-    exit(0);
-  }
+  if (size >= DEFAULT_SIZE || size <= 0)
+    return -1;
     
   // process at most 6 bytes per iteration
-  for (uint32_t i = 0; i < (strlen(input)); i += 6) {
+  for (uint32_t i = 0; i < size; i += 6) {
     a = unhex(input[i], input[i+1]);
     b = unhex(input[i+2], input[i+3]);
     c = unhex(input[i+4], input[i+5]);
@@ -37,40 +30,39 @@ char* encode(const char* input) {
     y = (temp & 0x000fc000) >> 14;
     z = (temp & 0x00003f00) >> 8;   
 
-    output[k++] = alphabet[w];
-    output[k++] = alphabet[x];
-
+    buf[k++] = alphabet[w];
+    buf[k++] = alphabet[x];
+ 
     // Special processing (fewer than 24 bits in input)
-    if ((strlen(input) > 2) & (i <= strlen(input)-6)) {
-      output[k++] = alphabet[y];           
-    } else output[k++] = '='; 
+    if ((size > 2) && (i <= size-6)) {
+      buf[k++] = alphabet[y];           
+    } else buf[k++] = '='; 
 
-    if ((strlen(input) > 4) & (i <= strlen(input)-6)) {
-      output[k++] = alphabet[z];           
-    } else output[k++] = '='; 
+    if ((size > 4) && (i <= size-6)) {
+      buf[k++] = alphabet[z];           
+    } else buf[k++] = '='; 
 
     // Debug output
     //printf("%u\n%u\n%u\n%u\n\n", w, x, y, z); 
     //printf("%s\n", output);
   }
 
-  return output;
+  strcpy(output, buf);
+  return 0;
 }
 
-uint8_t* decode(const char* input) {
-  char* output = malloc(1000*sizeof(char));
+int32_t decode(const char* input, char* output) {
+  char buf[DEFAULT_SIZE] = {0};
+  int32_t size = strlen(input);
   uint8_t a, b, c, d;
   uint8_t w, x, y;
   uint32_t k = 0;
   uint32_t temp = 0;
 
-  if (!output)
-    return NULL;
+  if (size >= DEFAULT_SIZE || size <= 0)
+    return -1; 
 
-  if (strlen(input) <= 0)
-      return "";
-
-  for(uint32_t i = 0; i < strlen(input); i += 4) {
+  for(uint32_t i = 0; i < size; i += 4) {
     // Input bytes
     a = pos_in_alphabet(input[i]);
     b = pos_in_alphabet(input[i+1]);
@@ -84,16 +76,17 @@ uint8_t* decode(const char* input) {
     x = (temp >> 16);
     y = (temp >> 8);
 
-    output[k++] = w;
+    buf[k++] = w;
 
     if ((strlen(input) > 1))
-      output[k++] = x;
+      buf[k++] = x;
 
     if ((strlen(input) > 2))
-      output[k++] = y;
+      buf[k++] = y;
   }
-  
-  return output;
+
+  strcpy(output, buf);
+  return 0;
 }
 
 
@@ -105,14 +98,23 @@ int main(int argc, char* argv[]) {
     exit(0);
   }
 
-  // Print unhex to base64
-  if (argc == 2)
-    printf("%s\n", encode(argv[1]));
+  // Print hex to base64
+  if (argc == 2) { 
+    if (strlen(argv[1]) & 1) {
+      printf("%s\n", "hex input is odd!");
+      exit(0);
+    }
+ 
+    char temp[DEFAULT_SIZE];
+    encode(argv[1], temp);
+    printf("%s\n", temp);
+  }
 
-  // Print base64 to unhex
+  // Print base64 to hex
   if (argc == 3) {
     if (strcmp(argv[1], "-d") == 0) {
-      uint8_t* bytes = decode(argv[2]);
+      uint8_t bytes[DEFAULT_SIZE];
+      decode(argv[2], (char*) bytes);
 
       for (int i = 0; i < strlen((const char*) bytes); i++) {
         printf("%x", bytes[i]);

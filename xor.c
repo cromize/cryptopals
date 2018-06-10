@@ -1,4 +1,4 @@
-// xor two equal buffers, by: cromize(2018)
+// xor functions, by: cromize(2018)
 
 #include <stdio.h>
 #include <stdint.h>
@@ -6,34 +6,37 @@
 #include <stdlib.h>
 #include "helpers.c"
 
-char* xor(const char* str1, const char* str2) {
-  uint32_t k = 0;
-  char* output = malloc(sizeof(char) * 1000);
+void xor(const char* str1, const char* str2, char* output) {
+  char buf[DEFAULT_SIZE];
+  int32_t size_s1 = strlen(str1);
   
-  if (!output)
-    return NULL; 
+  for (uint8_t i = 0; i < size_s1; i+=2) {
+    uint8_t a = unhex(str1[i], str1[i+1]);
+    uint8_t b = unhex(str2[i], str2[i+1]);
 
-  if (strlen(str1) != strlen(str2)) {
+    char temp[3];
+    hex(a ^ b, temp);
+    strcat(buf, temp); 
+  }
+
+  strcpy(output, buf); 
+
+  return;
+}
+
+int main(int argc, char* argv[]) {
+  char output[DEFAULT_SIZE];
+
+  if (strlen(argv[1]) != strlen(argv[2])) {
     printf("%s\n", "input lengths don't match");
     exit(0);
   }
 
-  if (strlen(str1) & 1) {
+  if (strlen(argv[1]) & 1) {
     printf("%s\n", "hex input is odd!");
     exit(0);
   }
- 
-  for (uint8_t i = 0; i < strlen(str1); i+=2) {
-    uint8_t a = unhex(str1[i], str1[i+1]);
-    uint8_t b = unhex(str2[i], str2[i+1]);
 
-    strcat(output, hex(a ^ b)); 
-  }
-
-  return output;
-}
-
-int main(int argc, char* argv[]) {
   // Print help
   if (argc <= 1) {
     printf("%s\n", "xor tool");
@@ -42,8 +45,10 @@ int main(int argc, char* argv[]) {
   }
 
   // Print xor 
-  if (argc == 3)
-    printf("%s\n", xor(argv[1], argv[2]));
+  if (argc == 3) {
+    xor(argv[1], argv[2], output);
+    printf("%s\n", output);
+  }
 
   return 0;
 }

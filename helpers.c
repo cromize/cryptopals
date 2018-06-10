@@ -1,5 +1,7 @@
 // helper functions, by: cromize(2018)
 
+#define DEFAULT_SIZE    1024
+
 const char alphabet[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
 // *** Helpers ***
@@ -8,13 +10,41 @@ uint8_t unhex(char a, char b) {
   return strtol(temp, NULL, 16);
 }
 
-const char* hex(uint8_t a) {
-  char* temp = malloc(sizeof(uint8_t));  
-  if (!temp)
-    return NULL;
+int32_t unhex_string(const char* input, char* output) {
+  char buf[DEFAULT_SIZE] = {0};
+  int32_t size = strlen(input);
+  int32_t j = 0;
 
-  sprintf(temp, "%x", a);
-  return temp;
+  if (size >= DEFAULT_SIZE || size <= 0)
+    return -1; 
+
+  for (int i = 0; i < size; i+=2) {
+    buf[j++] = unhex(input[i], input[i+1]);
+  }
+  strcpy(output, buf);
+  return 0;
+}
+
+void hex(uint8_t a, char* output) {
+  char buf[3];
+
+  sprintf(buf, "%x", a);
+  strcpy(output, buf);
+  return;
+}
+
+int32_t hex_string(const char* input, char* output) {
+  char buf[DEFAULT_SIZE] = {0};
+  int32_t size = strlen(input);
+
+  if (size >= DEFAULT_SIZE || size <= 0)
+    return -1; 
+
+  for (int i = 0; i < size; i++) {
+   sprintf(buf, "%x", input[i]);
+  }
+  strcpy(output, buf);
+  return 0;
 }
 
 int8_t pos_in_alphabet(char input) {
@@ -23,6 +53,5 @@ int8_t pos_in_alphabet(char input) {
       return j;
   }
 
-  return 0;
+  return -1;
 }
-
