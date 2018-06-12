@@ -10,7 +10,7 @@ uint8_t unhex(char a, char b) {
   return strtol(temp, NULL, 16);
 }
 
-int32_t unhex_string(const char* input, char* output) {
+int32_t unhex_string(const char* input, uint8_t* output) {
   char buf[DEFAULT_SIZE] = {0};
   int32_t size = strlen(input);
   int32_t j = 0;
@@ -21,7 +21,8 @@ int32_t unhex_string(const char* input, char* output) {
   for (int i = 0; i < size; i+=2) {
     buf[j++] = unhex(input[i], input[i+1]);
   }
-  strcpy(output, buf);
+  memcpy(output, buf, strlen(buf));
+  //strcpy(output, buf);
   return 0;
 }
 

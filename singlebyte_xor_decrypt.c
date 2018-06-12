@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <stdlib.h>
+#include <ctype.h>
 #include "helpers.c"
 
 // Take input, do INPUT XOR KEY(1byte)
@@ -15,8 +16,11 @@ char freq[] = "zqxjkvbpygfwmucldrhsnioate";
 
 // add score by frequency of usage of each letter
 // the higher you are in freq array, the bigger the score
-void add_score(const char* input, uint32_t* score_arr, int line_num) {
+static void add_score(const char* input, uint32_t* score_arr, int line_num) {
+  // each char in input
   for (int j = 0; j < strlen(input); j++) {
+
+    // check if input char is in frequently used table
     for (int i = 0; i < 26; i++) {
       if (tolower(input[j]) == freq[i]) {
         score_arr[line_num] += i+1; 
@@ -24,14 +28,12 @@ void add_score(const char* input, uint32_t* score_arr, int line_num) {
         // continue to next iteration
         i = 32767;
       }
-      else
-        score_arr[line_num] -= 0; 
     }
   }
 }
 
-// return a key with highest score
-char get_key_highest_score(uint32_t* score_arr) {
+// returns a key with highest score
+static char get_key_highest_score(uint32_t* score_arr, int32_t* highest_score) {
   int32_t highest = 0; 
   char highest_char = 0;
 
@@ -42,64 +44,50 @@ char get_key_highest_score(uint32_t* score_arr) {
       highest_char = (char) i;
     }
   }
+
+  *highest_score = highest;
   
   return highest_char;
 }
 
-int32_t crack(const char* input, char* output, char* output_key) {
+// returns score of input
+int32_t crack_singlebyte_xor(const char* input, char* output, int* highest_score_output) {
+  int32_t size = strlen(input);
   uint32_t score[256] = {0}; 
-  uint8_t buf[DEFAULT_SIZE] = {0};
+  char buf[DEFAULT_SIZE] = {0};
   uint8_t unhexed[DEFAULT_SIZE] = {0};
+
+  if (size >= DEFAULT_SIZE || size <= 0)
+    return -1;
 
   // unhex input
   unhex_string(input, unhexed);
 
   // xor and score each input
   for (int32_t key = 1; key < 256; key++) {
-    for(int j = 0; j < strlen(unhexed); j++) {
+    for(int j = 0; j < strlen((char*) unhexed); j++) {
       buf[j] = unhexed[j] ^ key; 
     }
     
     add_score(buf, score, key);
   }
 
-  char key = get_key_highest_score(score);
+  int32_t highest_score = 0;
+  char key = get_key_highest_score(score, &highest_score);
 
-  for(int j = 0; j < strlen(unhexed); j++)
+  // decrypt final output
+  for (int j = 0; j < strlen((char*)unhexed); j++)
     buf[j] = unhexed[j] ^ key;
 
-  //*output_key = key;
-
-  //strcpy(output_key, key);
+  *highest_score_output = highest_score; 
   strcpy(output, buf);
-  return 0;
-
-/*
-  for (int i = 0; i < 256; i++) {
-    printf("%d(%c)\t", score[i], i);
-
-    for(int j = 0; j < strlen(buf); j++)
-      printf("%c", buf[j] ^ i);
-
-    printf("\n");
-  }
-  printf("\n");
-*/
-
-  /*
-  for (int i = 0; i < 26; i++) {
-    char key = get_highest_score(score) ^ freq[i];
-    printf("\nkey: %c ", key);
-
-    for(int j = 0; j < strlen(input); j++)
-      printf("%c", key ^ input[j]); 
-  }
-  */
+  return key;
 }
 
 int main(int argc, char* argv[]) {
   char output[DEFAULT_SIZE];
   char key;
+  int highest_score;
   
   // Print help
   if (argc <= 1) {
@@ -110,9 +98,9 @@ int main(int argc, char* argv[]) {
 
   // decrypt  
   if (argc == 2) {
-    crack(argv[1], output, key);
+    key = crack_singlebyte_xor(argv[1], output, &highest_score);
     printf("decrypted: %s\n", output);
-    printf("key: %c (ASCII: %d)\n", key, key);
+    printf("key: %c (dec: %d)\n", key, key);
   } 
 
   return 0;
