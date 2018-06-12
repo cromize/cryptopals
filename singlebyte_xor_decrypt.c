@@ -5,7 +5,8 @@
 #include <string.h>
 #include <stdlib.h>
 #include <ctype.h>
-#include "helpers.c"
+#include "helpers.h"
+#include "singlebyte_xor_decrypt.h"
 
 // Take input, do INPUT XOR KEY(1byte)
 // Save each variation
@@ -84,6 +85,7 @@ int32_t crack_singlebyte_xor(const char* input, char* output, int* highest_score
   return key;
 }
 
+#ifndef AS_LIB 
 int main(int argc, char* argv[]) {
   char output[DEFAULT_SIZE];
   char key;
@@ -105,3 +107,4 @@ int main(int argc, char* argv[]) {
 
   return 0;
 }
+#endif

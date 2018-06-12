@@ -1,13 +1,14 @@
 // helper functions, by: cromize(2018)
 
-#define DEFAULT_SIZE    1024
+#include <stdint.h>
+#include "helpers.h"
 
 const char alphabet[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
 // *** Helpers ***
 uint8_t unhex(char a, char b) {
   char temp[] = {a, b};
-  return strtol(temp, NULL, 16);
+  return strtol(temp, 0, 16);
 }
 
 int32_t unhex_string(const char* input, uint8_t* output) {

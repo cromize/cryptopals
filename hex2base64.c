@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <stdlib.h>
+#include "hex2base64.h"
 #include "helpers.c"
 
 int32_t encode(const char* input, char* output) {
@@ -89,7 +90,7 @@ int32_t decode(const char* input, char* output) {
   return 0;
 }
 
-
+#ifndef AS_LIB
 int main(int argc, char* argv[]) {
   // Print help
   if (argc <= 1) {
@@ -125,3 +126,5 @@ int main(int argc, char* argv[]) {
 
   return 0;
 }
+
+#endif

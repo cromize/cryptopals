@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <stdlib.h>
+#include "xor.h"
 #include "helpers.c"
 
 void xor(const char* str1, const char* str2, char* output) {
@@ -24,8 +25,16 @@ void xor(const char* str1, const char* str2, char* output) {
   return;
 }
 
+#ifndef AS_LIB
 int main(int argc, char* argv[]) {
   char output[DEFAULT_SIZE];
+
+  // Print help
+  if (argc <= 2) {
+    printf("%s\n", "xor tool");
+    printf("%s\n", "supply input1 and input2");
+    exit(0);
+  }
 
   if (strlen(argv[1]) != strlen(argv[2])) {
     printf("%s\n", "input lengths don't match");
@@ -37,18 +46,14 @@ int main(int argc, char* argv[]) {
     exit(0);
   }
 
-  // Print help
-  if (argc <= 1) {
-    printf("%s\n", "xor tool");
-    printf("%s\n", "supply input");
-    exit(0);
-  }
-
   // Print xor 
   if (argc == 3) {
     xor(argv[1], argv[2], output);
     printf("%s\n", output);
   }
+  
 
   return 0;
 }
+
+#endif
