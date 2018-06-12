@@ -85,7 +85,7 @@ int32_t crack_singlebyte_xor(const char* input, char* output, int* highest_score
   return key;
 }
 
-#ifndef AS_LIB 
+#ifndef SINGLEBYTE_XOR_DECRYPT 
 int main(int argc, char* argv[]) {
   char output[DEFAULT_SIZE];
   char key;

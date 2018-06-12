@@ -90,7 +90,7 @@ int32_t decode(const char* input, char* output) {
   return 0;
 }
 
-#ifndef AS_LIB
+#ifndef HEX2BASE64
 int main(int argc, char* argv[]) {
   // Print help
   if (argc <= 1) {

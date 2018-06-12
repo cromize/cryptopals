@@ -25,7 +25,7 @@ void xor(const char* str1, const char* str2, char* output) {
   return;
 }
 
-#ifndef AS_LIB
+#ifndef XOR
 int main(int argc, char* argv[]) {
   char output[DEFAULT_SIZE];
 

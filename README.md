@@ -3,6 +3,7 @@
 ## Todo
 
 ## Done
-1.1 Convert hex to base64
-1.2 Fixed XOR
-1.3 Single-byte XOR cipher
+1.1 Convert hex to base64   
+1.2 Fixed XOR  
+1.3 Single-byte XOR cipher  
+1.4 Detect single-charackter XOR  
