@@ -1,17 +1,16 @@
 // hex to base64 and vice versa, by: cromize(2018)
 
-#include <stdio.h>
 #include <stdint.h>
 #include <string.h>
 #include <stdlib.h>
 #include "hex2base64.h"
-#include "helpers.c"
+#include "helpers.h"
 
 int32_t encode(const char* input, char* output) {
   char buf[DEFAULT_SIZE] = {0};
   int32_t size = strlen(input);
-  uint8_t a, b, c;
-  uint8_t w, x, y, z;
+  uint8_t a = 0, b = 0, c = 0;
+  uint8_t w = 0, x = 0, y = 0, z = 0;
   uint32_t k = 0;
   uint32_t temp = 0;
 
@@ -47,8 +46,7 @@ int32_t encode(const char* input, char* output) {
     //printf("%u\n%u\n%u\n%u\n\n", w, x, y, z); 
     //printf("%s\n", output);
   }
-
-  strcpy(output, buf);
+  memcpy(output, buf, DEFAULT_SIZE);
   return 0;
 }
 
@@ -89,42 +87,3 @@ int32_t decode(const char* input, char* output) {
   strcpy(output, buf);
   return 0;
 }
-
-#ifndef HEX2BASE64
-int main(int argc, char* argv[]) {
-  // Print help
-  if (argc <= 1) {
-    printf("%s\n", "base64 to hex tool");
-    printf("%s\n", "supply input or -d for decryption.");
-    exit(0);
-  }
-
-  // Print hex to base64
-  if (argc == 2) { 
-    if (strlen(argv[1]) & 1) {
-      printf("%s\n", "hex input is odd!");
-      exit(0);
-    }
- 
-    char temp[DEFAULT_SIZE];
-    encode(argv[1], temp);
-    printf("%s\n", temp);
-  }
-
-  // Print base64 to hex
-  if (argc == 3) {
-    if (strcmp(argv[1], "-d") == 0) {
-      uint8_t bytes[DEFAULT_SIZE];
-      decode(argv[2], (char*) bytes);
-
-      for (int i = 0; i < strlen((const char*) bytes); i++) {
-        printf("%x", bytes[i]);
-      }
-      printf("\n");
-    }
-  }
-
-  return 0;
-}
-
-#endif

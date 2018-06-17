@@ -84,27 +84,3 @@ int32_t crack_singlebyte_xor(const char* input, char* output, int* highest_score
   strcpy(output, buf);
   return key;
 }
-
-#ifndef SINGLEBYTE_XOR_DECRYPT 
-int main(int argc, char* argv[]) {
-  char output[DEFAULT_SIZE];
-  char key;
-  int highest_score;
-  
-  // Print help
-  if (argc <= 1) {
-    printf("%s\n", "single byte XOR decrypt tool");
-    printf("%s\n", "supply input");
-    exit(0);
-  }
-
-  // decrypt  
-  if (argc == 2) {
-    key = crack_singlebyte_xor(argv[1], output, &highest_score);
-    printf("decrypted: %s\n", output);
-    printf("key: %c (dec: %d)\n", key, key);
-  } 
-
-  return 0;
-}
-#endif

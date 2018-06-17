@@ -1,6 +1,6 @@
 // helper functions, by: cromize(2018)
 
-#include <stdint.h>
+#include <stdio.h>
 #include "helpers.h"
 
 const char alphabet[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
@@ -28,9 +28,9 @@ int32_t unhex_string(const char* input, uint8_t* output) {
 }
 
 void hex(uint8_t a, char* output) {
-  char buf[3];
+  char buf[3] = {0};
 
-  sprintf(buf, "%x", a);
+  sprintf(buf, "%02x", a);
   strcpy(output, buf);
   return;
 }
@@ -43,7 +43,7 @@ int32_t hex_string(const char* input, char* output) {
     return -1; 
 
   for (int i = 0; i < size; i++) {
-   sprintf(buf, "%x", input[i]);
+    sprintf(buf + strlen(buf), "%02x", input[i]);
   }
   strcpy(output, buf);
   return 0;
