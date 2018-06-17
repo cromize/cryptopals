@@ -4,10 +4,9 @@
 #define DEFAULT_SIZE    1024
 
 #include <stdint.h>
-#include <stdio.h>
 #include <string.h>
 
-const char alphabet[26];
+const char alphabet[64];
 
 uint8_t unhex(char a, char b);
 int32_t unhex_string(const char* input, uint8_t* output); 
