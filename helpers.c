@@ -58,3 +58,22 @@ int8_t pos_in_alphabet(char input) {
 
   return -1;
 }
+
+int hamming_distance(const char* input1, const char* input2) {
+  int len1 = strlen(input1);
+  int len2 = strlen(input2);
+  int dist = 0;
+
+  if (len1 <= 0) return -1;
+  if (len1 != len2) return -1;
+
+  for (int i = 0; i < len1; i++) {
+    unsigned char val = input1[i] ^ input2[i];
+    while (val != 0) {
+      dist++;
+      val &= val - 1;
+    }
+  }
+
+  return dist;
+}
