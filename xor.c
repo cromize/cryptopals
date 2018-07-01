@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <stdlib.h>
+#include "crack_singlebyte_xor.h"
 #include "xor.h"
 #include "helpers.h"
 
@@ -25,9 +26,9 @@ void xor(const char* str1, const char* str2, char* output) {
   return;
 }
 
-void repeating_key_xor(const char* input_file, const char* key, char* output) {
+int repeating_key_xor(const char* input_file, const char* key, char* output) {
   FILE* input;
-  char buf[256] = {0};
+  char buf[DEFAULT_LINE_SIZE] = {0};
   int ch = 0;
   int i = 0;
   int j = 0;
@@ -36,7 +37,7 @@ void repeating_key_xor(const char* input_file, const char* key, char* output) {
   if (!input) 
     return -1;
 
-  uint8_t temp[256] = {0};
+  char temp[DEFAULT_LINE_SIZE] = {0};
 
   // process each line in file
   while ((ch = fgetc(input)) != EOF) {
@@ -49,13 +50,14 @@ void repeating_key_xor(const char* input_file, const char* key, char* output) {
   strcpy(output, buf);
 
   fclose(input);
+  return 0;
 }
 
-void detect_singlebyte_xor_cipher(const char* input_file, char* output) {
+int detect_singlebyte_xor_cipher(const char* input_file, char* output) {
   FILE* input;
   int score_arr[DEFAULT_SIZE] = {0};
-  char buf[256];  
-  char xored_arr[DEFAULT_SIZE][256] = {0};
+  char buf[DEFAULT_LINE_SIZE];  
+  char xored_arr[DEFAULT_SIZE][DEFAULT_LINE_SIZE] = {0};
 
   input = fopen(input_file, "r");
   if (!input) 
@@ -63,8 +65,8 @@ void detect_singlebyte_xor_cipher(const char* input_file, char* output) {
 
   // process each line in file and save it into memory
   int i = 0;
-  while (fgets(buf, 256, input) != 0) {
-    char temp[256];
+  while (fgets(buf, DEFAULT_LINE_SIZE, input) != 0) {
+    char temp[DEFAULT_LINE_SIZE];
     int score;
     crack_singlebyte_xor(buf, temp, &score);
     strcpy(xored_arr[i], temp);
@@ -83,5 +85,5 @@ void detect_singlebyte_xor_cipher(const char* input_file, char* output) {
 
   strcpy(output, xored_arr[pos]);
   fclose(input);
-  return;
+  return 0;
 }

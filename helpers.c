@@ -1,6 +1,7 @@
 // helper functions, by: cromize(2018)
 
 #include <stdio.h>
+#include <stdlib.h>
 #include "helpers.h"
 
 const char alphabet[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";

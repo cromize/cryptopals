@@ -1,7 +1,8 @@
 #ifndef HELPERS_H
 #define HELPERS_H
 
-#define DEFAULT_SIZE    1024
+#define DEFAULT_SIZE        1024
+#define DEFAULT_LINE_SIZE   512
 
 #include <stdint.h>
 #include <string.h>

@@ -6,7 +6,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include "../helpers.h"
-#include "../singlebyte_xor_decrypt.h"
+#include "../crack_singlebyte_xor.h"
 
 int main(int argc, char* argv[]) {
   char output[DEFAULT_SIZE];
