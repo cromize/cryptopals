@@ -71,7 +71,7 @@ int hamming_distance(const char* input1, const char* input2) {
     unsigned char val = input1[i] ^ input2[i];
     while (val != 0) {
       dist++;
-      val &= val - 1;
+      val &= val - 1;   // remove 1 bit each time
     }
   }
 

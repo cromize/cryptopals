@@ -6,7 +6,7 @@
 #include "hex2base64.h"
 #include "helpers.h"
 
-int32_t encode(const char* input, char* output) {
+int32_t base64_encode(const char* input, char* output) {
   char buf[DEFAULT_SIZE] = {0};
   int32_t size = strlen(input);
   uint8_t a = 0, b = 0, c = 0;
@@ -50,7 +50,7 @@ int32_t encode(const char* input, char* output) {
   return 0;
 }
 
-int32_t decode(const char* input, char* output) {
+int32_t base64_decode(const char* input, char* output) {
   char buf[DEFAULT_SIZE] = {0};
   int32_t size = strlen(input);
   uint8_t a, b, c, d;

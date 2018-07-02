@@ -23,7 +23,7 @@ int main(int argc, char* argv[]) {
     }
  
     char temp[DEFAULT_SIZE] = {0};
-    encode(argv[1], temp);
+    base64_encode(argv[1], temp);
     printf("%s\n", temp);
   }
 
@@ -31,7 +31,7 @@ int main(int argc, char* argv[]) {
   if (argc == 3) {
     if (strcmp(argv[1], "-d") == 0) {
       uint8_t bytes[DEFAULT_SIZE] = {0};
-      decode(argv[2], (char*) bytes);
+      base64_decode(argv[2], (char*) bytes);
 
       for (int i = 0; i < strlen((const char*) bytes); i++) {
         printf("%x", bytes[i]);
