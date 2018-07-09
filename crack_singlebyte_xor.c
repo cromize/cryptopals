@@ -51,7 +51,7 @@ static char get_key_highest_score(uint32_t* score_arr, int32_t* highest_score) {
   return highest_char;
 }
 
-// returns score of input
+// returns cracked key 
 int32_t crack_singlebyte_xor(const char* input, char* output, int* highest_score_output) {
   int32_t size = strlen(input);
   uint32_t score[256] = {0}; 

@@ -46,7 +46,7 @@ int repeating_key_xor(const char* input_file, const char* key, char* output) {
     if (j >= strlen(key)) j = 0;
   }
   
-  hex_string(temp, buf);
+  hex_string(temp, buf, strlen(temp)*2);
   strcpy(output, buf);
 
   fclose(input);

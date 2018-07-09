@@ -7,7 +7,7 @@
 const char alphabet[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
 // *** Helpers ***
-uint8_t unhex(char a, char b) {
+uint8_t unhex(const char a, const char b) {
   char temp[] = {a, b};
   return strtol(temp, 0, 16);
 }
@@ -23,29 +23,29 @@ int32_t unhex_string(const char* input, uint8_t* output) {
   for (int i = 0; i < size; i+=2) {
     buf[j++] = unhex(input[i], input[i+1]);
   }
-  memcpy(output, buf, strlen(buf));
-  //strcpy(output, buf);
+  memcpy(output, buf, sizeof(uint8_t) * DEFAULT_SIZE);
   return 0;
 }
 
-void hex(uint8_t a, char* output) {
+void hex(const uint8_t a, char* output) {
   char buf[3] = {0};
 
   sprintf(buf, "%02x", a);
-  strcpy(output, buf);
+  buf[2] = '\00';
+  memcpy(output, buf, sizeof(char) * 3);
   return;
 }
 
-int32_t hex_string(const char* input, char* output) {
+int32_t hex_string(const uint8_t* input, char* output, int32_t n) {
   char buf[DEFAULT_SIZE] = {0};
-  int32_t size = strlen(input);
 
-  if (size >= DEFAULT_SIZE || size <= 0)
+  if (n >= DEFAULT_SIZE || n <= 0)
     return -1; 
 
-  for (int i = 0; i < size; i++) {
-    sprintf(buf + strlen(buf), "%02x", input[i]);
+  for (int i = 0; i < n; i++) {
+    sprintf(buf + i*2, "%02x", input[i]);
   }
+  buf[n] = 0;
   strcpy(output, buf);
   return 0;
 }

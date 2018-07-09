@@ -9,11 +9,11 @@
 
 const char alphabet[64];
 
-uint8_t unhex(char a, char b);
+uint8_t unhex(const char a, const char b);
 int32_t unhex_string(const char* input, uint8_t* output); 
 
-void hex(uint8_t a, char* output); 
-int32_t hex_string(const char* input, char* output); 
+void hex(const uint8_t a, char* output); 
+int32_t hex_string(const uint8_t* input, char* output, int32_t n); 
 
 int8_t pos_in_alphabet(char input); 
 int hamming_distance(const char* input1, const char* input2);
