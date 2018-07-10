@@ -22,7 +22,6 @@ void xor(const char* str1, const char* str2, char* output) {
   }
 
   strcpy(output, buf); 
-
   return;
 }
 
@@ -37,16 +36,16 @@ int repeating_key_xor(const char* input_file, const char* key, char* output) {
   if (!input) 
     return -1;
 
-  char temp[DEFAULT_LINE_SIZE] = {0};
+  uint8_t temp[DEFAULT_LINE_SIZE] = {0};
 
   // process each line in file
   while ((ch = fgetc(input)) != EOF) {
-    if (ch == '\n') break;
+    if (ch == '\n') continue;
     temp[i++] = ch ^ key[j++];
     if (j >= strlen(key)) j = 0;
   }
   
-  hex_string(temp, buf, strlen(temp)*2);
+  hex_string(temp, buf, i*2);
   strcpy(output, buf);
 
   fclose(input);

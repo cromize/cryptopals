@@ -1,4 +1,4 @@
-// single byte xor, by: cromize(2018)
+// xor two input strings, by: cromize(2018)
 
 #include <stdio.h>
 #include <stdint.h>
@@ -33,6 +33,5 @@ int main(int argc, char* argv[]) {
     printf("%s\n", output);
   }
   
-
   return 0;
 }

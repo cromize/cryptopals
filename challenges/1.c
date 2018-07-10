@@ -11,7 +11,7 @@ int main(int argc, char* argv[]) {
   // Print help
   if (argc <= 1) {
     printf("%s\n", "hex to base64 tool");
-    printf("%s\n", "supply input or -d for decryption.");
+    printf("%s\n", "supply input or -d for decryption");
     exit(0);
   }
 

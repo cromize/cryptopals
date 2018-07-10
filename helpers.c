@@ -45,7 +45,6 @@ int32_t hex_string(const uint8_t* input, char* output, int32_t n) {
   for (int i = 0; i < n; i++) {
     sprintf(buf + i*2, "%02x", input[i]);
   }
-  buf[n] = '\0';
   strcpy(output, buf);
   return 0;
 }
