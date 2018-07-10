@@ -31,10 +31,10 @@ int main(int argc, char* argv[]) {
   if (argc == 3) {
     if (strcmp(argv[1], "-d") == 0) {
       uint8_t bytes[DEFAULT_SIZE] = {0};
-      base64_decode(argv[2], (char*) bytes);
+      base64_decode(argv[2], bytes);
 
-      for (int i = 0; i < strlen((const char*) bytes); i++) {
-        printf("%x", bytes[i]);
+      for (int i = 0; bytes[i] != '\00'; i++) {
+        printf("%02x", bytes[i]);
       }
       printf("\n");
     }

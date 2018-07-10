@@ -4,6 +4,6 @@
 #include <stdint.h>
 
 int32_t base64_encode(const char* input, char* output);
-int32_t base64_decode(const char* input, char* output);
+int32_t base64_decode(const char* input, uint8_t* output);
 
 #endif

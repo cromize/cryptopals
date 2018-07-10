@@ -13,7 +13,7 @@ uint8_t unhex(const char a, const char b) {
 }
 
 int32_t unhex_string(const char* input, uint8_t* output) {
-  char buf[DEFAULT_SIZE] = {0};
+  uint8_t buf[DEFAULT_SIZE] = {0};
   int32_t size = strlen(input);
   int32_t j = 0;
 
@@ -31,7 +31,7 @@ void hex(const uint8_t a, char* output) {
   char buf[3] = {0};
 
   sprintf(buf, "%02x", a);
-  buf[2] = '\00';
+  buf[2] = '\0';
   memcpy(output, buf, sizeof(char) * 3);
   return;
 }
@@ -45,7 +45,7 @@ int32_t hex_string(const uint8_t* input, char* output, int32_t n) {
   for (int i = 0; i < n; i++) {
     sprintf(buf + i*2, "%02x", input[i]);
   }
-  buf[n] = 0;
+  buf[n] = '\0';
   strcpy(output, buf);
   return 0;
 }
@@ -54,6 +54,8 @@ int8_t pos_in_alphabet(char input) {
   for (uint8_t j = 0; j < 64; j++) {
     if (input == alphabet[j])  
       return j;
+    else if (input == '=') 
+      return 65;
   }
 
   return -1;

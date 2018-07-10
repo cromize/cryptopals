@@ -17,7 +17,7 @@ int32_t base64_encode(const char* input, char* output) {
   if (size >= DEFAULT_SIZE || size <= 0)
     return -1;
     
-  // process at most 6 bytes per iteration
+  // process at most 3 bytes per iteration
   for (uint32_t i = 0; i < size; i += 6) {
     a = unhex(input[i], input[i+1]);
     b = unhex(input[i+2], input[i+3]);
@@ -34,7 +34,7 @@ int32_t base64_encode(const char* input, char* output) {
     buf[k++] = alphabet[x];
  
     // Special processing (fewer than 24 bits in input)
-    if ((size > 2) && (i <= size-6)) {
+    if ((size > 2) && (i <= size-3)) {
       buf[k++] = alphabet[y];           
     } else buf[k++] = '='; 
 
@@ -46,22 +46,22 @@ int32_t base64_encode(const char* input, char* output) {
     //printf("%u\n%u\n%u\n%u\n\n", w, x, y, z); 
     //printf("%s\n", output);
   }
-  memcpy(output, buf, DEFAULT_SIZE);
+  memcpy(output, buf, sizeof(uint8_t) * DEFAULT_SIZE);
   return 0;
 }
 
-int32_t base64_decode(const char* input, char* output) {
-  char buf[DEFAULT_SIZE] = {0};
-  int32_t size = strlen(input);
+int32_t base64_decode(const char* input, uint8_t* output) {
+  uint8_t buf[DEFAULT_SIZE] = {0};
   uint8_t a, b, c, d;
   uint8_t w, x, y;
   uint32_t k = 0;
   uint32_t temp = 0;
+  int32_t size = strlen(input);
 
   if (size >= DEFAULT_SIZE || size <= 0)
     return -1; 
 
-  for(uint32_t i = 0; i < size; i += 4) {
+  for (uint32_t i = 0; i < size; i += 4) {
     // Input bytes
     a = pos_in_alphabet(input[i]);
     b = pos_in_alphabet(input[i+1]);
@@ -77,13 +77,13 @@ int32_t base64_decode(const char* input, char* output) {
 
     buf[k++] = w;
 
-    if ((strlen(input) > 1))
+    if (c != 65)
       buf[k++] = x;
 
-    if ((strlen(input) > 2))
+    if (d != 65)
       buf[k++] = y;
   }
 
-  strcpy(output, buf);
+  memcpy(output, buf, sizeof(uint8_t) * DEFAULT_SIZE);
   return 0;
 }
