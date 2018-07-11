@@ -1,7 +1,7 @@
 #ifndef HELPERS_H
 #define HELPERS_H
 
-#define DEFAULT_SIZE        1024
+#define DEFAULT_SIZE        1024 * 16
 #define DEFAULT_LINE_SIZE   512
 
 #include <stdint.h>
@@ -16,6 +16,6 @@ void hex(const uint8_t a, char* output);
 int32_t hex_string(const uint8_t* input, char* output, int32_t n); 
 
 int8_t pos_in_alphabet(char input); 
-int hamming_distance(const char* input1, const char* input2);
+int hamming_distance(const uint8_t* input1, const uint8_t* input2, int n);
 
 #endif

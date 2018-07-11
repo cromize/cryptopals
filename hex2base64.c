@@ -85,5 +85,5 @@ int32_t base64_decode(const char* input, uint8_t* output) {
   }
 
   memcpy(output, buf, sizeof(uint8_t) * DEFAULT_SIZE);
-  return 0;
+  return k;
 }

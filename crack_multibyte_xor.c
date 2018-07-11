@@ -1,7 +1,9 @@
 #include <stdio.h>
 #include <string.h>
+#include <math.h>
 #include "hex2base64.h"
 #include "crack_multibyte_xor.h"
+#include "crack_singlebyte_xor.h"
 #include "helpers.h"
 
 #define KEYSIZE_DEF     45
@@ -9,48 +11,122 @@
 int crack_multibyte_xor(const char* input_file) {
   FILE *fp = fopen(input_file, "rb");
 
-  char base64_buf[32767] = {0};
-  char buf[32767] = {0};
+  char file_line[DEFAULT_SIZE] = {0};
+  char base64_buf[DEFAULT_SIZE] = {0};
+  unsigned char buf[DEFAULT_SIZE] = {0};
 
-  char first_keysize_bytes[KEYSIZE_DEF+1] = {0};
-  char second_keysize_bytes[KEYSIZE_DEF+1] = {0};
-  char third_keysize_bytes[KEYSIZE_DEF+1] = {0};
-  char fourth_keysize_bytes[KEYSIZE_DEF+1] = {0};
+  unsigned char first_keysize_bytes[KEYSIZE_DEF+1] = {0};
+  unsigned char second_keysize_bytes[KEYSIZE_DEF+1] = {0};
+  unsigned char third_keysize_bytes[KEYSIZE_DEF+1] = {0};
+  unsigned char fourth_keysize_bytes[KEYSIZE_DEF+1] = {0};
 
-  int smallest_keysize = 32767; 
+  float smallest_avg = 32767; 
+  int smallest_keysize = 0;
+  int n = 0;
 
   float hamming_dist1 = 0;
   float hamming_dist2 = 0;
   float hamming_avg = 0;
 
-  int pos = 0;
-  while (fgets(base64_buf, DEFAULT_SIZE, fp)) {
-    char temp[DEFAULT_SIZE] = {0};
-    strtok(base64_buf, "\n");
-    base64_decode(base64_buf, temp);
-    strcat(buf, temp);
+  while (fgets(file_line, DEFAULT_SIZE, fp)) {
+    strtok(file_line, "\n");
+    strcat(base64_buf, file_line);
   }
 
-  int keysize_max = KEYSIZE_DEF;
-  if (strlen(buf) < keysize_max) keysize_max = strlen(buf)/4;
+  n = base64_decode(base64_buf, buf);
 
-  for (int keysize = 2; ; keysize++) {
+  int keysize_max = KEYSIZE_DEF;
+  if (n < keysize_max) keysize_max = n/4;
+
+  for (int keysize = 3; keysize < keysize_max; keysize++) {
     for (int i = 0; i < keysize; i++) {
       first_keysize_bytes[i] = buf[i];
       second_keysize_bytes[i] = buf[i+keysize];
       third_keysize_bytes[i] = buf[i+keysize*2];
       fourth_keysize_bytes[i] = buf[i+keysize*3];
     }
-    hamming_dist1 = hamming_distance(first_keysize_bytes, second_keysize_bytes)/(float)keysize;
-    hamming_dist2 = hamming_distance(third_keysize_bytes, fourth_keysize_bytes)/(float)keysize;
+    hamming_dist1 = hamming_distance(first_keysize_bytes, second_keysize_bytes, keysize)/(float)keysize;
+    hamming_dist2 = hamming_distance(third_keysize_bytes, fourth_keysize_bytes, keysize)/(float)keysize;
     hamming_avg = (hamming_dist1 + hamming_dist2)/2;
 
-    if (hamming_dist1 < 0 || hamming_dist2 < 0) break;
-    if (hamming_avg < smallest_keysize) smallest_keysize = hamming_avg;
+    memset(first_keysize_bytes, 0, sizeof(first_keysize_bytes));
+    memset(second_keysize_bytes, 0, sizeof(first_keysize_bytes));
+    memset(third_keysize_bytes, 0, sizeof(first_keysize_bytes));
+    memset(fourth_keysize_bytes, 0, sizeof(first_keysize_bytes));
 
+    if (hamming_dist1 < 0 || hamming_dist2 < 0) break;
+    if (hamming_avg < smallest_avg) {
+      smallest_keysize = keysize;
+      smallest_avg = hamming_avg;
+    }
+    /*
     printf("dist1: %f \n", hamming_dist1);
     printf("dist2: %f \n", hamming_dist2);
+    printf("hamming_avg: %f \n", hamming_avg);
+    printf("keysize: %i \n", keysize);
+    */
   }
-  printf("smallest average: %i\n", smallest_keysize);
+  printf("\nsmallest avg: %f \n", smallest_avg);
+  printf("keysize: %i \n", smallest_keysize);
+
+
+  // TODO: make 2d array for blocks and for loop to shift buf to each block 
+  //       find output with best histogram 
+
+  // blocks[keysize_length][ciphertext]
+  // we need as many blocks as keysize length
+  uint8_t blocks[KEYSIZE_DEF][DEFAULT_SIZE] = {0};
+  
+  int p = 0;
+  for (int j = 0; j < n; j += smallest_keysize) {
+    for (int i = 0; i < smallest_keysize; i++) { 
+      blocks[i][j] = buf[p++];
+    }
+  } 
+
+  // just for print
+  for (int i = 0; i < smallest_keysize; i++) { 
+    for (int j = 0; j < n; j += smallest_keysize) {
+      printf("%i ", blocks[i][j]);
+    }
+    printf("\n");
+  } 
+  exit(0);
+  
+  int highest_score = 0;
+  char out1[DEFAULT_SIZE] = {0};
+  char out2[DEFAULT_SIZE] = {0};
+  char out3[DEFAULT_SIZE] = {0};
+  char out4[DEFAULT_SIZE] = {0};
+  char out5[DEFAULT_SIZE] = {0};
+  char temp[DEFAULT_SIZE] = {0};
+
+  printf("key: \n");
+
+  hex_string(block1, temp, m);
+  printf("", crack_singlebyte_xor(temp, out1, &highest_score));
+
+  hex_string(block2, temp, m);
+  printf("", crack_singlebyte_xor(temp, out2, &highest_score));
+
+  hex_string(block3, temp, m);
+  printf("", crack_singlebyte_xor(temp, out3, &highest_score));
+
+  hex_string(block4, temp, m);
+  printf("", crack_singlebyte_xor(temp, out4, &highest_score));
+
+  hex_string(block5, temp, m);
+  printf("", crack_singlebyte_xor(temp, out5, &highest_score));
+
+  char final_output[DEFAULT_SIZE] = {0};
+  int j = 0;
+  for (int i = 0; i < m; i++) {
+   final_output[j++] = out1[i];  
+   final_output[j++] = out2[i];  
+   final_output[j++] = out3[i];  
+   final_output[j++] = out4[i];  
+   final_output[j++] = out5[i];  
+  }
+  printf("string: %s\n", final_output);
   return 0;
 }
