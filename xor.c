@@ -36,7 +36,7 @@ int repeating_key_xor(const char* input_file, const char* key, char* output) {
   if (!input) 
     return -1;
 
-  uint8_t temp[DEFAULT_LINE_SIZE] = {0};
+  uint8_t temp[DEFAULT_SIZE] = {0};
 
   // process each line in file
   while ((ch = fgetc(input)) != EOF) {
@@ -62,11 +62,12 @@ int detect_singlebyte_xor_cipher(const char* input_file, char* output) {
   if (!input) 
     return -1;
 
+  int n = 0;
   // process each line in file, hold the line with biggest score
-  while (fgets(input_buf, DEFAULT_LINE_SIZE, input) != 0) {
+  while (n = fgets(input_buf, DEFAULT_LINE_SIZE, input) != 0) {
     char temp[DEFAULT_LINE_SIZE];
     int score = 0;
-    crack_singlebyte_xor(input_buf, temp, &score);
+    crack_singlebyte_xor(input_buf, temp, &score, n);
     if (score > score_output) {
       score_output = score;
       strcpy(output_buf, temp);
