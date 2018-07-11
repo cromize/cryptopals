@@ -52,24 +52,18 @@ static char get_key_highest_score(uint32_t* score_arr, int32_t* highest_score) {
 }
 
 // returns cracked key 
-int32_t crack_singlebyte_xor(const char* input, char* output, int* highest_score_output) {
-  int32_t size = strlen(input);
+int32_t crack_singlebyte_xor(const uint8_t* input, char* output, int* highest_score_output, int n) {
   uint32_t score[256] = {0}; 
   char buf[DEFAULT_SIZE] = {0};
-  uint8_t unhexed[DEFAULT_SIZE] = {0};
 
-  if (size >= DEFAULT_SIZE || size <= 0)
+  if (n > DEFAULT_SIZE || n <= 0)
     return -1;
-
-  // unhex input
-  unhex_string(input, unhexed);
 
   // xor and score each input
   for (int32_t key = 1; key < 256; key++) {
-    for(int j = 0; j < strlen((char*) unhexed); j++) {
-      buf[j] = unhexed[j] ^ key; 
+    for(int j = 0; j < n; j++) {
+      buf[j] = input[j] ^ key; 
     }
-    
     add_score(buf, score, key);
   }
 
@@ -77,8 +71,8 @@ int32_t crack_singlebyte_xor(const char* input, char* output, int* highest_score
   char key = get_key_highest_score(score, &highest_score);
 
   // decrypt final output
-  for (int j = 0; j < strlen((char*)unhexed); j++)
-    buf[j] = unhexed[j] ^ key;
+  for (int j = 0; j < n; j++)
+    buf[j] = input[j] ^ key;
 
   *highest_score_output = highest_score; 
   strcpy(output, buf);

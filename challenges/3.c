@@ -22,9 +22,12 @@ int main(int argc, char* argv[]) {
 
   // decrypt  
   if (argc == 2) {
-    key = crack_singlebyte_xor(argv[1], output, &highest_score);
+    uint8_t temp[DEFAULT_SIZE] = {0};
+    int size = strlen(argv[1]);
+    unhex_string(argv[1], temp);
+    key = crack_singlebyte_xor(temp, output, &highest_score, size/2);
     printf("decrypted: %s\n", output);
-    printf("key: %c (dec: %d)\n", key, key);
+    printf("key: %c (decimal: %d)\n", key, key);
   } 
 
   return 0;

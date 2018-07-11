@@ -38,7 +38,7 @@ int crack_multibyte_xor(const char* input_file) {
   int keysize_max = KEYSIZE_DEF;
   if (n < keysize_max) keysize_max = n/4;
 
-  for (int keysize = 3; keysize < keysize_max; keysize++) {
+  for (int keysize = 14; keysize < keysize_max; keysize++) {
     for (int i = 0; i < keysize; i++) {
       first_keysize_bytes[i] = buf[i];
       second_keysize_bytes[i] = buf[i+keysize];
@@ -69,64 +69,71 @@ int crack_multibyte_xor(const char* input_file) {
   printf("\nsmallest avg: %f \n", smallest_avg);
   printf("keysize: %i \n", smallest_keysize);
 
+/*
+  for (int i = 0; i < n; i++) {
+    printf("%03i ", buf[i]);
+  } 
+  printf("\n");
+*/
 
   // TODO: make 2d array for blocks and for loop to shift buf to each block 
   //       find output with best histogram 
 
   // blocks[keysize_length][ciphertext]
-  // we need as many blocks as keysize length
   uint8_t blocks[KEYSIZE_DEF][DEFAULT_SIZE] = {0};
   
+  // transpose to blocks of KEYSIZE length
   int p = 0;
-  for (int j = 0; j < n; j += smallest_keysize) {
-    for (int i = 0; i < smallest_keysize; i++) { 
-      blocks[i][j] = buf[p++];
+  for (int i = 0; i < n/smallest_keysize; i++) {
+    for (int j = 0; j < smallest_keysize; j++) { 
+      blocks[j][i] = buf[p++];
     }
   } 
 
   // just for print
-  for (int i = 0; i < smallest_keysize; i++) { 
-    for (int j = 0; j < n; j += smallest_keysize) {
-      printf("%i ", blocks[i][j]);
+  /*
+  for (int i = 0; i < n/smallest_keysize; i++) {
+    for (int j = 0; j < smallest_keysize; j++) { 
+      printf("%03i ", blocks[j][i]);
     }
     printf("\n");
   } 
-  exit(0);
-  
+  printf("\n");
+ */ 
+
+    //exit(0);
   int highest_score = 0;
-  char out1[DEFAULT_SIZE] = {0};
-  char out2[DEFAULT_SIZE] = {0};
-  char out3[DEFAULT_SIZE] = {0};
-  char out4[DEFAULT_SIZE] = {0};
-  char out5[DEFAULT_SIZE] = {0};
-  char temp[DEFAULT_SIZE] = {0};
+  uint8_t temp[DEFAULT_SIZE] = {0};
+  uint8_t cracked_blocks[KEYSIZE_DEF][DEFAULT_SIZE] = {0};
 
-  printf("key: \n");
-
-  hex_string(block1, temp, m);
-  printf("", crack_singlebyte_xor(temp, out1, &highest_score));
-
-  hex_string(block2, temp, m);
-  printf("", crack_singlebyte_xor(temp, out2, &highest_score));
-
-  hex_string(block3, temp, m);
-  printf("", crack_singlebyte_xor(temp, out3, &highest_score));
-
-  hex_string(block4, temp, m);
-  printf("", crack_singlebyte_xor(temp, out4, &highest_score));
-
-  hex_string(block5, temp, m);
-  printf("", crack_singlebyte_xor(temp, out5, &highest_score));
-
-  char final_output[DEFAULT_SIZE] = {0};
-  int j = 0;
-  for (int i = 0; i < m; i++) {
-   final_output[j++] = out1[i];  
-   final_output[j++] = out2[i];  
-   final_output[j++] = out3[i];  
-   final_output[j++] = out4[i];  
-   final_output[j++] = out5[i];  
+  // crack transposed blocks by singlebyte xor
+  for (int i = 0; i < smallest_keysize; i++) {
+    crack_singlebyte_xor(blocks[i], cracked_blocks[i], &highest_score, n/smallest_keysize);
   }
+
+  /*
+  for (int i = 0; i < smallest_keysize; i++) {
+    printf("%s\n", cracked_blocks[i]);
+  }
+
+  for (int i = 0; i < n/smallest_keysize; i++) { 
+    for (int j = 0; j < smallest_keysize; j++) {
+      printf("%c ", cracked_blocks[j][i]);
+    }
+    printf("\n");
+  }
+  exit(0);
+
+  */
+  char final_output[DEFAULT_SIZE] = {0};
+
+  int k = 0;
+  for (int i = 0; i < n/smallest_keysize; i++) {
+    for (int j = 0; j < smallest_keysize; j++) {
+      final_output[k++] = cracked_blocks[j][i];
+    }
+  } 
+
   printf("string: %s\n", final_output);
   return 0;
 }

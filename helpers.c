@@ -61,8 +61,8 @@ int8_t pos_in_alphabet(char input) {
 }
 
 int hamming_distance(const uint8_t* input1, const uint8_t* input2, int n) {
-  int len1 = strlen(input1);
-  int len2 = strlen(input2);
+  //int len1 = strlen(input1);
+  //int len2 = strlen(input2);
   int dist = 0;
 
   if (n <= 0) return -1;
