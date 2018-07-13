@@ -8,7 +8,8 @@
 #include "../xor.h"
 
 int main(int argc, char* argv[]) {
-  char output[DEFAULT_SIZE];
+  char output[DEFAULT_SIZE] = {0};
+  int score = 0;
 
   // Print help
   if (argc <= 1) {
@@ -19,7 +20,7 @@ int main(int argc, char* argv[]) {
 
   // detect 
   if (argc == 2) {
-    detect_singlebyte_xor_cipher(argv[1], output);    
+    detect_singlebyte_xor_cipher(argv[1], &score, output);    
     printf("string: %s", output);
   } 
 

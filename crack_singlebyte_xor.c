@@ -15,22 +15,29 @@
 
 char freq[] = "zqxjkvbpygfwmucldrhsnioate";
 
-// add score by frequency of usage of each letter
-// the higher you are in freq array, the bigger the score
-static void add_score(const char* input, uint32_t* score_arr, int line_num) {
+int calculate_score(const char* input) {
+  int size = strlen(input);
+  int score = 0;
   // each char in input
-  for (int j = 0; j < strlen(input); j++) {
+  for (int j = 0; j < size; j++) {
 
     // check if input char is in frequently used table
     for (int i = 0; i < 26; i++) {
       if (tolower(input[j]) == freq[i]) {
-        score_arr[line_num] += i+1; 
+        score += i+1; 
 
         // continue to next iteration
         i = 32767;
       }
     }
   }
+  return score;
+}
+
+// add score by frequency of usage of each letter
+// the higher you are in freq array, the bigger the score
+static void add_score(const char* input, uint32_t* score_arr_input, int line_num) {
+  score_arr_input[line_num] = calculate_score(input); 
 }
 
 // returns a key with highest score

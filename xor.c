@@ -52,9 +52,9 @@ int repeating_key_xor(const char* input_file, const char* key, char* output) {
   return 0;
 }
 
-int detect_singlebyte_xor_cipher(const char* input_file, char* output) {
+int detect_singlebyte_xor_cipher(const char* input_file, int* score_output, char* output) {
   FILE* input;
-  int score_output = 0;
+  int score_tmp = 0;
   char output_buf[DEFAULT_SIZE];
   char input_buf[DEFAULT_LINE_SIZE];  
 
@@ -62,19 +62,22 @@ int detect_singlebyte_xor_cipher(const char* input_file, char* output) {
   if (!input) 
     return -1;
 
-  int n = 0;
   // process each line in file, hold the line with biggest score
-  while (n = fgets(input_buf, DEFAULT_LINE_SIZE, input) != 0) {
-    char temp[DEFAULT_LINE_SIZE];
+  while (fgets(input_buf, DEFAULT_LINE_SIZE, input) != 0) {
+    uint8_t input_unhexed[DEFAULT_SIZE] = {0};
+    char temp[DEFAULT_LINE_SIZE] = {0};
+    int unhexed_size = strlen(input_buf)/2;
     int score = 0;
-    crack_singlebyte_xor(input_buf, temp, &score, n);
-    if (score > score_output) {
-      score_output = score;
+    unhex_string(input_buf, input_unhexed);
+    crack_singlebyte_xor(input_unhexed, temp, &score, unhexed_size);
+    if (score > score_tmp) {
+      score_tmp = score;
       strcpy(output_buf, temp);
     }
   }
 
   strcpy(output, output_buf);
+  *score_output = score_tmp; 
   fclose(input);
   return 0;
 }

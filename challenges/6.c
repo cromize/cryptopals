@@ -1,3 +1,5 @@
+// crack repeating key xor, by: cromize(2018)
+
 #include <stdio.h>
 #include <stdlib.h>
 #include "../helpers.h"
@@ -13,7 +15,12 @@ int main(int argc, char** argv) {
 
   // crack
   if (argc == 2) {
-    crack_multibyte_xor(argv[1]);
+    char cracked_key[DEFAULT_SIZE] = {0};
+    char cracked_output[DEFAULT_SIZE] = {0};
+    crack_multibyte_xor(argv[1], cracked_key, cracked_output);
+    printf("output: \n%s\n", cracked_output);
+    printf("key: %s\n", cracked_key);
+    printf("keysize: %i\n", strlen(cracked_key));
   }
 
   return 0;

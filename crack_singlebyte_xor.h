@@ -2,6 +2,7 @@
 #define CRACK_SINGLEBYTE_XOR_H
 
 char freq[26];
+int calculate_score(const char* input);
 int32_t crack_singlebyte_xor(const uint8_t* input, char* output, int* highest_score_output, int n); 
 
 #endif
