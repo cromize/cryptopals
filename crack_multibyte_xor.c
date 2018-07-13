@@ -111,6 +111,7 @@ int crack_multibyte_xor(const char* input_file, char* key_output, char* output) 
 
     char final_output[DEFAULT_SIZE] = {0};
 
+    // transpose blocks back to form output
     int k = 0;
     for (int i = 0; i < num_of_blocks; i++) {
       for (int j = 0; j < keysize; j++) {
