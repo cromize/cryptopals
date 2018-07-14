@@ -45,6 +45,7 @@ int32_t hex_string(const uint8_t* input, char* output, int32_t n) {
   for (int i = 0; i < n; i++) {
     sprintf(buf + i*2, "%02x", input[i]);
   }
+  buf[n] = '\0';
   strcpy(output, buf);
   return 0;
 }
@@ -56,17 +57,13 @@ int8_t pos_in_alphabet(char input) {
     else if (input == '=') 
       return 65;
   }
-
   return -1;
 }
 
 int hamming_distance(const uint8_t* input1, const uint8_t* input2, int n) {
-  //int len1 = strlen(input1);
-  //int len2 = strlen(input2);
   int dist = 0;
 
   if (n <= 0) return -1;
-  //if (len1 != len2) return -1;
 
   for (int i = 0; i < n; i++) {
     unsigned char val = input1[i] ^ input2[i];
@@ -75,6 +72,5 @@ int hamming_distance(const uint8_t* input1, const uint8_t* input2, int n) {
       val &= val - 1;   // remove 1 bit each time
     }
   }
-
   return dist;
 }

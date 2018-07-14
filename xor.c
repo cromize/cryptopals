@@ -9,7 +9,7 @@
 #include "helpers.h"
 
 void xor(const char* str1, const char* str2, char* output) {
-  char buf[DEFAULT_SIZE];
+  char buf[DEFAULT_SIZE] = {0};
   int32_t size_s1 = strlen(str1);
   
   for (uint8_t i = 0; i < size_s1; i+=2) {
@@ -29,23 +29,24 @@ int repeating_key_xor(const char* input_file, const char* key, char* output) {
   FILE* input;
   char buf[DEFAULT_LINE_SIZE] = {0};
   int ch = 0;
-  int i = 0;
-  int j = 0;
+  int n = 0;
+  int keypos = 0;
 
   input = fopen(input_file, "r");
   if (!input) 
     return -1;
 
+  int keysize = strlen(key);
   uint8_t temp[DEFAULT_SIZE] = {0};
 
   // process each line in file
   while ((ch = fgetc(input)) != EOF) {
     if (ch == '\n') continue;
-    temp[i++] = ch ^ key[j++];
-    if (j >= strlen(key)) j = 0;
+    temp[n++] = ch ^ key[keypos++];
+    if (keypos >= keysize) keypos = 0;
   }
   
-  hex_string(temp, buf, i*2);
+  hex_string(temp, buf, n*2);
   strcpy(output, buf);
 
   fclose(input);
@@ -55,8 +56,8 @@ int repeating_key_xor(const char* input_file, const char* key, char* output) {
 int detect_singlebyte_xor_cipher(const char* input_file, int* score_output, char* output) {
   FILE* input;
   int score_tmp = 0;
-  char output_buf[DEFAULT_SIZE];
-  char input_buf[DEFAULT_LINE_SIZE];  
+  char output_buf[DEFAULT_SIZE] = {0};
+  char input_buf[DEFAULT_LINE_SIZE] = {0};  
 
   input = fopen(input_file, "r");
   if (!input) 

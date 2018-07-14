@@ -1,4 +1,4 @@
-// find key to a single byte XOR cipher
+// find key to a single byte XOR cipher, by: cromize(2018)
 
 #include <stdio.h>
 #include <stdint.h>
@@ -9,9 +9,9 @@
 #include "../crack_singlebyte_xor.h"
 
 int main(int argc, char* argv[]) {
-  char output[DEFAULT_SIZE];
-  char key;
-  int highest_score;
+  char output[DEFAULT_SIZE] = {0};
+  char key = 0;
+  int highest_score = 0;
   
   // Print help
   if (argc <= 1) {

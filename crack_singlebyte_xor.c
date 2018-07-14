@@ -52,9 +52,7 @@ static char get_key_highest_score(uint32_t* score_arr, int32_t* highest_score) {
       highest_char = (char) i;
     }
   }
-
   *highest_score = highest;
-  
   return highest_char;
 }
 
