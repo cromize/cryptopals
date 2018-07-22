@@ -6,19 +6,18 @@
 #include "hex2base64.h"
 #include "helpers.h"
 
-int32_t base64_encode(const char* input, char* output) {
+int32_t base64_encode(const uint8_t* input, int len, uint8_t* output) {
   char buf[DEFAULT_SIZE] = {0};
-  int32_t size = strlen(input);
   uint8_t a = 0, b = 0, c = 0;
   uint8_t w = 0, x = 0, y = 0, z = 0;
   uint32_t k = 0;
   uint32_t temp = 0;
 
-  if (size >= DEFAULT_SIZE || size <= 0)
+  if (len >= DEFAULT_SIZE || len <= 0)
     return -1;
     
   // process at most 3 bytes per iteration
-  for (uint32_t i = 0; i < size; i += 6) {
+  for (uint32_t i = 0; i < len; i += 6) {
     a = unhex(input[i], input[i+1]);
     b = unhex(input[i+2], input[i+3]);
     c = unhex(input[i+4], input[i+5]);
@@ -34,11 +33,11 @@ int32_t base64_encode(const char* input, char* output) {
     buf[k++] = alphabet[x];
  
     // Special processing (fewer than 24 bits in input)
-    if ((size > 2) && (i <= size-3)) {
+    if ((len > 2) && (i <= len-3)) {
       buf[k++] = alphabet[y];           
     } else buf[k++] = '='; 
 
-    if ((size > 4) && (i <= size-6)) {
+    if ((len > 4) && (i <= len-6)) {
       buf[k++] = alphabet[z];           
     } else buf[k++] = '='; 
 
@@ -56,12 +55,12 @@ int32_t base64_decode(const char* input, uint8_t* output) {
   uint8_t w, x, y;
   uint32_t k = 0;
   uint32_t temp = 0;
-  int32_t size = strlen(input);
+  int len = sizeof(input);
 
-  if (size >= DEFAULT_SIZE || size <= 0)
+  if (len >= DEFAULT_SIZE || len <= 0)
     return -1; 
 
-  for (uint32_t i = 0; i < size; i += 4) {
+  for (uint32_t i = 0; i < len; i += 4) {
     // Input bytes
     a = pos_in_alphabet(input[i]);
     b = pos_in_alphabet(input[i+1]);

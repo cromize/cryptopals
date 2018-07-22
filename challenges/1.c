@@ -23,7 +23,7 @@ int main(int argc, char* argv[]) {
     }
  
     char temp[DEFAULT_SIZE] = {0};
-    base64_encode(argv[1], temp);
+    base64_encode(argv[1], strlen(argv[1]), temp);
     printf("%s\n", temp);
   }
 
