@@ -24,7 +24,7 @@ int32_t unhex_string(const char* input, uint8_t* output) {
     buf[j++] = unhex(input[i], input[i+1]);
   }
   memcpy(output, buf, sizeof(uint8_t) * DEFAULT_SIZE);
-  return 0;
+  return j;
 }
 
 void hex(const uint8_t a, char* output) {
@@ -51,11 +51,12 @@ int32_t hex_string(const uint8_t* input, char* output, int32_t n) {
 }
 
 int8_t pos_in_alphabet(char input) {
+  if (input == '=')
+    return 65;
+
   for (uint8_t j = 0; j < 64; j++) {
     if (input == alphabet[j])  
       return j;
-    else if (input == '=') 
-      return 65;
   }
   return -1;
 }

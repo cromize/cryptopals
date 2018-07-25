@@ -22,9 +22,11 @@ int main(int argc, char* argv[]) {
       exit(0);
     }
  
-    char temp[DEFAULT_SIZE] = {0};
-    base64_encode(argv[1], strlen(argv[1]), temp);
-    printf("%s\n", temp);
+    char output[DEFAULT_SIZE] = {0};
+    uint8_t buf[DEFAULT_SIZE] = {0};
+    int n = unhex_string(argv[1], buf); 
+    base64_encode((uint8_t*) buf, n, output);
+    printf("%s\n", output);
   }
 
   // Print base64 to hex
