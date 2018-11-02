@@ -1,21 +1,8 @@
 #!/usr/bin/env python3
 import binascii
 import sys
-import struct
-
-def abort(msg):
-  print(msg)
-  sys.exit(1)
-
-def xor(s1, s2):
-  output = b''
-  if not len(s1) == len(s2):
-    raise ValueError("input string lengths doesn't match")
-
-  for i in range(len(s1)):
-    output += bytes([s1[i] ^ s2[i]])
-
-  return output
+sys.path.append('..')
+from helpers import abort, xor
 
 if __name__ == "__main__":
   if len(sys.argv) <= 2:
