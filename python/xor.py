@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+import struct 
+
 def score_string(string):
   score_table = "etaoinshrdlcu mwfgypbvkjxqz"[::-1]
   score = 0
@@ -17,7 +19,17 @@ def xor_key(string, key):
     xored_str += chr(ch ^ key)
   return xored_str
 
-def crack_cipher(cipher):
+def xor_repeating_key(string, key):
+  xored_str = b"" 
+  idx = 0 
+  for ch in string:
+    xored_str += bytes([ord(ch) ^ ord(key[idx])])
+    idx += 1
+    if idx >= len(key):
+      idx = 0
+  return xored_str
+
+def crack_singlebyte_xor(cipher):
   best_score = 0
   best_str = ""
   for key in range(0, 128):
@@ -27,3 +39,5 @@ def crack_cipher(cipher):
       best_score = score  
       best_str = xored_str
   return best_str, best_score
+
+  
