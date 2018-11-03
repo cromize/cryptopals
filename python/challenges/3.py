@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
 import sys
 import binascii
-
-enc_str = "1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736"
-#enc_str = '''3116581b0a01080c171f0a1908100154580c101d580b111508141d5820372a581b1108101d0a58110b5819580c01081d58171e58191c1c110c110e1d581b1108101d0a54581916581d161b0a01080c1117165819141f170a110c1015580c10190c'''
+sys.path.append('..')
+from helpers import abort, xor
 
 def score_string(string):
   score_table = "etaoinshrdlcu mwfgypbvkjxqz"[::-1]
@@ -21,17 +20,22 @@ def xor_key(string, key):
     xored_str += chr(ch ^ key)
   return xored_str
 
-if __name__ == "__main__":
+def crack_cipher(cipher):
   best_score = 0
   best_str = ""
-  raw_str = binascii.unhexlify(enc_str) 
   xored_str = ""
   for key in range(0, 128):
-    xored_str = xor_key(raw_str, key)
+    xored_str = xor_key(cipher, key)
     score = score_string(xored_str)
     if score > best_score:
       best_score = score  
       best_str = xored_str
+  return best_str
 
-  print(best_str) 
+if __name__ == "__main__":
+  if len(sys.argv) == 2:
+    plaintext = crack_cipher(binascii.unhexlify(sys.argv[1]))
+    print(plaintext)
+  else: 
+    abort(f'{sys.argv[0]}: input')
     
