@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-import struct 
 
 def score_string(string):
   score_table = "etaoinshrdlcu mwfgypbvkjxqz"[::-1]
@@ -40,4 +39,40 @@ def crack_singlebyte_xor(cipher):
       best_str = xored_str
   return best_str, best_score
 
+
+from helpers import hamming_dst
+import sys
+import itertools
+
+def get_avg_keysize(cipher):
+  KEYSIZE_MAX = 40
+  avg = []
+  for idx, keysize in enumerate(range(2, KEYSIZE_MAX)):
+    chunks = [cipher[i:i+keysize] for i in range(0, len(cipher)-keysize, keysize)]
+    chunk_pairs = list(itertools.combinations(chunks, 2))
+    avg_dst = 0
+    for pair in chunk_pairs:
+      dst = hamming_dst(pair[0], pair[1]) / keysize
+      avg_dst += dst
+    avg.append((avg_dst/len(chunk_pairs), keysize))
+  avg.sort()
+  print(avg)
+
+def crack_multibyte_xor(cipher):
+  get_avg_keysize(cipher)
+  sys.exit(0)
+
+  keysize = 2
+  b1 = cipher[0:keysize]
+  b2 = cipher[keysize:keysize*2]
+
+  print(cipher[0:4])
+  print('\n')
+
+  print(b1)
+  print('\n')
+  print(b2)
+
+  print(hamming_dst(b1, b2))
+  
   
