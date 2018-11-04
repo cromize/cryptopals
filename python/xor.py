@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+import itertools
+from helpers import hamming_dst
 
 def score_string(string):
   score_table = "etaoinshrdlcu mwfgypbvkjxqz"[::-1]
@@ -40,10 +42,8 @@ def crack_singlebyte_xor(cipher):
   return best_str, best_score
 
 
-from helpers import hamming_dst
 import sys
-import itertools
-
+import array
 def get_avg_keysize(cipher):
   KEYSIZE_MAX = 40
   avg_min = 65535
@@ -62,13 +62,52 @@ def get_avg_keysize(cipher):
     if avg_dst < avg_min:
       avg_min = avg_dst
       best_keysize = keysize
-  print(best_keysize)
-
+  return best_keysize
+  
+def transpose_chunks(chunks, keysize, inverse):
+  # transpose blocks
+  t_chunks = [b""] * keysize
+  for i in range(len(chunks)//keysize):
+    for j in range(keysize):
+      t_chunks[j] += bytes([chunks[j+i*keysize]])
+  return t_chunks
+  
 def crack_multibyte_xor(cipher):
-  get_avg_keysize(cipher)
+  keysize = get_avg_keysize(cipher)
+  plaintext_chunks = ""
+  cipher_chunks = [b""] * keysize
+  cipher_chunks = transpose_chunks(cipher, keysize, False)
+
+  cracked_chunks = b""
+  for chunk in cipher_chunks:
+    cracked = crack_singlebyte_xor(chunk)[0]
+    cracked_chunks += bytes(cracked, 'ascii')
+
+  plaintext = transpose_chunks(cracked_chunks, keysize, True)
+  print(cracked_chunks[:keysize])
   sys.exit(0)
 
-  keysize = 2
+  plaintext = ""
+  plaintext_chunks = [b""] * keysize
+  for idx, chunk in enumerate(cipher_chunks):
+    cracked = crack_singlebyte_xor(chunk)[0]
+    for i in range(0, len(cracked)):
+      plaintext_chunks[idx] += str(cracked[i])
+
+  plaintext = transpose_chunks(plaintext_chunks, keysize)
+  print(plaintext)
+  #plaintext_chunks.append(cracked)
+  #plaintext_chunks[idx] = ([cracked[i] for i in range(keysize)])
+#print(plaintext_chunks)
+
+  #cipher_chunks = [cipher[i*keysize] for i in range(keysize)]
+  print(plaintext_chunks) 
+  sys.exit(0)
+  plaintext_chunks = [crack_singlebyte_xor(cipher_chunks[i]) for i in range(len(cipher_chunks))]
+  print(plaintext_chunks)
+  sys.exit(0)
+
+
   b1 = cipher[0:keysize]
   b2 = cipher[keysize:keysize*2]
 
