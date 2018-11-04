@@ -46,17 +46,23 @@ import itertools
 
 def get_avg_keysize(cipher):
   KEYSIZE_MAX = 40
-  avg = []
-  for idx, keysize in enumerate(range(2, KEYSIZE_MAX)):
-    chunks = [cipher[i:i+keysize] for i in range(0, len(cipher)-keysize, keysize)]
+  avg_min = 65535
+  best_keysize = 0
+  for keysize in range(2, KEYSIZE_MAX):
+    # we can divide large cipher text by 2-8 to speed up
+    chunks = [cipher[i:i+keysize] for i in range(0, (len(cipher)//8)-keysize, keysize)]
     chunk_pairs = list(itertools.combinations(chunks, 2))
     avg_dst = 0
+
     for pair in chunk_pairs:
       dst = hamming_dst(pair[0], pair[1]) / keysize
       avg_dst += dst
-    avg.append((avg_dst/len(chunk_pairs), keysize))
-  avg.sort()
-  print(avg)
+
+    avg_dst /= len(chunk_pairs)
+    if avg_dst < avg_min:
+      avg_min = avg_dst
+      best_keysize = keysize
+  print(best_keysize)
 
 def crack_multibyte_xor(cipher):
   get_avg_keysize(cipher)
