@@ -6,18 +6,18 @@ def score_string(string):
   score_table = "etaoinshrdlcu mwfgypbvkjxqz"[::-1]
   score = 0
   for idx, k in enumerate(score_table):
-    if k in string:  
+    if k in string.decode():  
       score += idx 
-    elif k.upper() in string:
+    elif k.upper() in string.decode():
       score += idx//2 
     else:
       score -= 1
   return score
 
 def xor_key(string, key):
-  xored_str = "" 
+  xored_str = b"" 
   for ch in string:
-    xored_str += chr(ch ^ key)
+    xored_str += bytes([ch ^ key])
   return xored_str
 
 def xor_repeating_key(string, key):
@@ -64,26 +64,34 @@ def get_avg_keysize(cipher):
       best_keysize = keysize
   return best_keysize
   
-def transpose_chunks(chunks, keysize, inverse):
+def divide_text(text, keysize):
   # transpose blocks
   t_chunks = [b""] * keysize
-  for i in range(len(chunks)//keysize):
+  for i in range(len(text)//keysize):
     for j in range(keysize):
-      t_chunks[j] += bytes([chunks[j+i*keysize]])
+      t_chunks[j] += bytes([text[j+i*keysize]])
   return t_chunks
+
+def combine_chunks(chunks, keysize):
+  text = b""
+  for i in range(len(chunks)):
+    for chunk in chunks:
+      text += bytes([chunk[i]])
+  print(text.decode())
   
 def crack_multibyte_xor(cipher):
   keysize = get_avg_keysize(cipher)
   plaintext_chunks = ""
-  cipher_chunks = [b""] * keysize
-  cipher_chunks = transpose_chunks(cipher, keysize, False)
+  cipher_chunks = divide_text(cipher, keysize)
+  cracked_chunks = []
 
-  cracked_chunks = b""
   for chunk in cipher_chunks:
     cracked = crack_singlebyte_xor(chunk)[0]
-    cracked_chunks += bytes(cracked, 'ascii')
+    cracked_chunks.append(cracked)
 
-  plaintext = transpose_chunks(cracked_chunks, keysize, True)
+  combine_chunks(cracked_chunks, keysize)
+  sys.exit(0)
+  plaintext = divide_text(cracked_chunks, keysize)
   print(cracked_chunks[:keysize])
   sys.exit(0)
 
@@ -94,7 +102,7 @@ def crack_multibyte_xor(cipher):
     for i in range(0, len(cracked)):
       plaintext_chunks[idx] += str(cracked[i])
 
-  plaintext = transpose_chunks(plaintext_chunks, keysize)
+  plaintext = divide_text(plaintext_chunks, keysize)
   print(plaintext)
   #plaintext_chunks.append(cracked)
   #plaintext_chunks[idx] = ([cracked[i] for i in range(keysize)])
