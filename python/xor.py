@@ -41,9 +41,6 @@ def crack_singlebyte_xor(cipher):
       best_str = xored_str
   return best_str, best_score
 
-
-import sys
-import array
 def get_avg_keysize(cipher):
   KEYSIZE_MAX = 40
   avg_min = 65535
@@ -77,7 +74,7 @@ def combine_chunks(chunks, keysize):
   for i in range(len(chunks)):
     for chunk in chunks:
       text += bytes([chunk[i]])
-  print(text.decode())
+  return text
   
 def crack_multibyte_xor(cipher):
   keysize = get_avg_keysize(cipher)
@@ -89,43 +86,6 @@ def crack_multibyte_xor(cipher):
     cracked = crack_singlebyte_xor(chunk)[0]
     cracked_chunks.append(cracked)
 
-  combine_chunks(cracked_chunks, keysize)
-  sys.exit(0)
-  plaintext = divide_text(cracked_chunks, keysize)
-  print(cracked_chunks[:keysize])
-  sys.exit(0)
+  plaintext = combine_chunks(cracked_chunks, keysize)
+  return plaintext
 
-  plaintext = ""
-  plaintext_chunks = [b""] * keysize
-  for idx, chunk in enumerate(cipher_chunks):
-    cracked = crack_singlebyte_xor(chunk)[0]
-    for i in range(0, len(cracked)):
-      plaintext_chunks[idx] += str(cracked[i])
-
-  plaintext = divide_text(plaintext_chunks, keysize)
-  print(plaintext)
-  #plaintext_chunks.append(cracked)
-  #plaintext_chunks[idx] = ([cracked[i] for i in range(keysize)])
-#print(plaintext_chunks)
-
-  #cipher_chunks = [cipher[i*keysize] for i in range(keysize)]
-  print(plaintext_chunks) 
-  sys.exit(0)
-  plaintext_chunks = [crack_singlebyte_xor(cipher_chunks[i]) for i in range(len(cipher_chunks))]
-  print(plaintext_chunks)
-  sys.exit(0)
-
-
-  b1 = cipher[0:keysize]
-  b2 = cipher[keysize:keysize*2]
-
-  print(cipher[0:4])
-  print('\n')
-
-  print(b1)
-  print('\n')
-  print(b2)
-
-  print(hamming_dst(b1, b2))
-  
-  
