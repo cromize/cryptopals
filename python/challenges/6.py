@@ -11,7 +11,8 @@ if __name__ == "__main__":
     with open(sys.argv[1]) as input_file:
       cipher = input_file.read().rstrip() 
       cipher = b64decode(cipher)
-      crack_multibyte_xor(cipher)
-
+      plaintext, key = crack_multibyte_xor(cipher)
+      print(plaintext.decode())
+      print("key: ", key[:-1]) 
   else: 
     abort(f'{sys.argv[0]}: filename')

@@ -33,13 +33,15 @@ def xor_repeating_key(string, key):
 def crack_singlebyte_xor(cipher):
   best_score = 0
   best_str = ""
+  best_key = 0
   for key in range(0, 128):
     xored_str = xor_key(cipher, key)
     score = score_string(xored_str)
     if score > best_score:
       best_score = score  
       best_str = xored_str
-  return best_str, best_score
+      best_key = key
+  return best_str, best_score, bytes([best_key])
 
 def get_avg_keysize(cipher):
   KEYSIZE_MAX = 40
@@ -61,31 +63,40 @@ def get_avg_keysize(cipher):
       best_keysize = keysize
   return best_keysize
   
+# we added one chunk, if we have odd keylength
+# not ideal solution
 def divide_text(text, keysize):
   # transpose blocks
-  t_chunks = [b""] * keysize
-  for i in range(len(text)//keysize):
+  t_chunks = [b""] * (keysize+1)
+  for i in range((len(text)//keysize)+1):
     for j in range(keysize):
-      t_chunks[j] += bytes([text[j+i*keysize]])
+      if j+i*keysize <= 2875:
+        t_chunks[j] += bytes([text[j+i*keysize]])
   return t_chunks
 
+# not sure if try, except is right method
 def combine_chunks(chunks, keysize):
   text = b""
-  for i in range(len(chunks)):
+  for i in range(len(chunks[0])):
     for chunk in chunks:
-      text += bytes([chunk[i]])
+      try:
+        text += bytes([chunk[i]])
+      except Exception:
+        pass
   return text
   
+import sys
 def crack_multibyte_xor(cipher):
+  multibyte_key = b""
   keysize = get_avg_keysize(cipher)
-  plaintext_chunks = ""
   cipher_chunks = divide_text(cipher, keysize)
   cracked_chunks = []
 
   for chunk in cipher_chunks:
-    cracked = crack_singlebyte_xor(chunk)[0]
+    cracked, __, singlebyte_key = crack_singlebyte_xor(chunk)
+    multibyte_key += singlebyte_key
     cracked_chunks.append(cracked)
 
   plaintext = combine_chunks(cracked_chunks, keysize)
-  return plaintext
+  return plaintext, multibyte_key
 
