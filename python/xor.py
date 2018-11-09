@@ -3,12 +3,12 @@ import itertools
 from helpers import hamming_dst
 
 def score_string(string):
-  score_table = "etaoinshrdlcu mwfgypbvkjxqz"[::-1]
+  score_table = b"etaoinshrdlcu mwfgypbvkjxqz"[::-1]
   score = 0
   for idx, k in enumerate(score_table):
-    if k in string.decode():  
+    if k in string:  
       score += idx 
-    elif k.upper() in string.decode():
+    elif str(k).upper() in str(string):
       score += idx//2 
     else:
       score -= 1

@@ -10,7 +10,7 @@ def detect_xored_cipher(filename):
     best_score = 0
     best_line = ""
     for line in cipher_file:
-      plaintext, score = crack_singlebyte_xor(binascii.unhexlify(line.rstrip()))
+      plaintext, score, _ = crack_singlebyte_xor(binascii.unhexlify(line.rstrip()))
       if score > best_score:
         best_score = score
         best_line = plaintext 

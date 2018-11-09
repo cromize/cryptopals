@@ -7,7 +7,7 @@ from xor import crack_singlebyte_xor
 
 if __name__ == "__main__":
   if len(sys.argv) == 2:
-    plaintext = crack_singlebyte_xor(binascii.unhexlify(sys.argv[1]))
+    plaintext = crack_singlebyte_xor(binascii.unhexlify(sys.argv[1]))[0].decode()
     print(plaintext)
   else: 
     abort(f'{sys.argv[0]}: input')
