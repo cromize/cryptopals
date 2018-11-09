@@ -13,6 +13,6 @@ if __name__ == "__main__":
       cipher = b64decode(cipher)
       plaintext, key = crack_multibyte_xor(cipher)
       print(plaintext.decode())
-      print("key: ", key[:-1]) 
+      print("key: ", key) 
   else: 
     abort(f'{sys.argv[0]}: filename')
