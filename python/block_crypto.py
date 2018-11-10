@@ -28,3 +28,12 @@ def detect_aes_ecb(cipher_lines):
       most_common_block = counted_blocks
       best_idx = idx
   return best_idx
+
+def pkcs7_pad(text, size):
+  if len(text) < size:
+    left = size - len(text)
+  else:
+    left = size % len(text)
+  text += b'\x04' * left
+  return text
+
