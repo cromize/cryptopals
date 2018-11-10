@@ -24,7 +24,7 @@ def xor_repeating_key(string, key):
   xored_str = b"" 
   idx = 0 
   for ch in string:
-    xored_str += bytes([ord(ch) ^ ord(key[idx])])
+    xored_str += bytes([ord(ch) ^ key[idx]])
     idx += 1
     if idx >= len(key):
       idx = 0

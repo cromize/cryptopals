@@ -2,7 +2,9 @@
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.backends import default_backend
 from collections import Counter
+from xor import xor_repeating_key
 
+# **** ECB mode ****
 def aes_ecb_encrypt(plaintext, key):
   backend = default_backend()
   cipher = Cipher(algorithms.AES(key), modes.ECB(), backend=backend)
@@ -15,7 +17,7 @@ def aes_ecb_decrypt(ciphertext, key):
   decryptor = cipher.decryptor()
   return decryptor.update(ciphertext) 
 
-def detect_aes_ecb(cipher_lines):
+def aes_ecb_detect(cipher_lines):
   most_common_block = 0
   best_idx = 0
   for idx, line in enumerate(cipher_lines):
@@ -29,6 +31,16 @@ def detect_aes_ecb(cipher_lines):
       best_idx = idx
   return best_idx
 
+# **** CBC mode ****
+def aes_cbc_encrypt(plaintext, key, iv):
+  pass
+
+def aes_cbc_decrypt(ciphertext, key, iv):
+  blocks = [ciphertext[i:i+16] for i in range(0, len(ciphertext), 16)]
+  deciphered = aes_ecb_decrypt(blocks[0], key)
+  plain = xor_repeating_key(deciphered.decode(), iv) 
+  print(plain)
+  
 def pkcs7_pad(text, size):
   if len(text) < size:
     left = size - len(text)
