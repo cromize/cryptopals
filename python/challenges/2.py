@@ -5,7 +5,7 @@ sys.path.append('..')
 from helpers import abort, xor
 
 if __name__ == "__main__":
-  if len(sys.argv) == 3:
+  if len(sys.argv) == 3 and not sys.argv[1] == '-h':
     i1 = binascii.unhexlify(sys.argv[1])
     i2 = binascii.unhexlify(sys.argv[2])
     xored = xor(i1, i2)
