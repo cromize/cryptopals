@@ -33,19 +33,31 @@ def aes_ecb_detect(cipher_lines):
 
 # **** CBC mode ****
 def aes_cbc_encrypt(plaintext, key, iv):
-  pass
+  plaintext = pkcs7_pad(plaintext, 16)
+  blocks = [plaintext[i:i+16] for i in range(0, len(plaintext), 16)]
+  ciphertext = b""
+  for block in blocks:
+    xored_block = xor_repeating_key(block, iv) 
+    ciphered = aes_ecb_encrypt(xored_block, key)
+    iv = ciphered 
+    ciphertext += ciphered
+  return ciphertext
 
 def aes_cbc_decrypt(ciphertext, key, iv):
   blocks = [ciphertext[i:i+16] for i in range(0, len(ciphertext), 16)]
-  deciphered = aes_ecb_decrypt(blocks[0], key)
-  plain = xor_repeating_key(deciphered.decode(), iv) 
-  print(plain)
+  plaintext = b""
+  for block in blocks:
+    deciphered = aes_ecb_decrypt(block, key)
+    plain_block = xor_repeating_key(deciphered, iv) 
+    iv = block 
+    plaintext += plain_block
+  return plaintext
   
 def pkcs7_pad(text, size):
   if len(text) < size:
     left = size - len(text)
   else:
-    left = size % len(text)
+    left = len(text) % size 
   text += b'\x04' * left
   return text
 
