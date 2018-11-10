@@ -67,7 +67,8 @@ def get_avg_keysize(cipher):
       best_keysize = keysize
   return best_keysize
   
-def divide_text(text, keysize):
+# **** vigenere crack ****
+def vig_divide_text(text, keysize):
   chunks = []
   for offset in range(keysize):
     idx_gen = (i for i in range(0, len(text), keysize) if i+offset < len(text))
@@ -75,7 +76,7 @@ def divide_text(text, keysize):
     chunks.append(chunk)
   return chunks
 
-def combine_chunks(chunks):
+def vig_combine_chunks(chunks):
   text = b""
   for offset in range(len(chunks[0])):
     idx_gen = (i for i in range(len(chunks)) if len(chunks[i]) > offset)
@@ -86,13 +87,13 @@ def combine_chunks(chunks):
 def crack_multibyte_xor(cipher):
   multibyte_key = b""
   keysize = get_avg_keysize(cipher)
-  cipher_chunks = divide_text(cipher, keysize)
+  cipher_chunks = vig_divide_text(cipher, keysize)
   cracked_chunks = []
   for chunk in cipher_chunks:
     cracked, _, singlebyte_key = crack_singlebyte_xor(chunk)
     multibyte_key += singlebyte_key
     cracked_chunks.append(cracked)
 
-  plaintext = combine_chunks(cracked_chunks)
+  plaintext = vig_combine_chunks(cracked_chunks)
   return plaintext, multibyte_key
 
