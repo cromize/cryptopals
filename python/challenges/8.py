@@ -8,7 +8,13 @@ if __name__ == "__main__":
   if len(sys.argv) == 2:
     with open(sys.argv[1], 'rb') as f:
       cipher_lines = f.readlines()
-      idx = aes_ecb_detect(cipher_lines)
-      print("index:", idx, "(starting from index 0)")
+      best_duplicate_count = 0
+      best_idx = 0
+      for idx, line in enumerate(cipher_lines):
+        duplicate_count = aes_ecb_detect(line)
+        if duplicate_count  > best_duplicate_count:
+          best_duplicate_count  = duplicate_count
+          best_idx = idx 
+      print("index:", best_idx, "(starting from index 0)")
   else: 
     abort(f'{sys.argv[0]}: filename')

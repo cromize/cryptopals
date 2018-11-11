@@ -17,23 +17,17 @@ def aes_ecb_decrypt(ciphertext, key):
   decryptor = cipher.decryptor()
   return decryptor.update(ciphertext) 
 
-def aes_ecb_detect(cipher_lines):
-  most_common_block = 0
-  best_idx = 0
-  for idx, line in enumerate(cipher_lines):
-    # divide blocks
-    blocks = [line[i:i+16] for i in range(0, len(line), 16)]
-    counter = Counter(blocks)
-    # sorted blocks by occurrence, most occurred at [0]
-    counted_blocks = counter.most_common()[0]
-    if counted_blocks[1] > best_idx:
-      most_common_block = counted_blocks
-      best_idx = idx
-  return best_idx
+# return count of duplicate blocks == ecb mode
+def aes_ecb_detect(cipher):
+  # divide blocks
+  blocks = [cipher[i:i+16] for i in range(0, len(cipher), 16)]
+  counter = Counter(blocks)
+  # sorted blocks by occurrence, most occurred at [0]
+  duplicate_count = counter.most_common()[0][1]
+  return duplicate_count
 
 # **** CBC mode ****
 def aes_cbc_encrypt(plaintext, key, iv):
-  plaintext = pkcs7_pad(plaintext, 16)
   blocks = [plaintext[i:i+16] for i in range(0, len(plaintext), 16)]
   ciphertext = b""
   for block in blocks:

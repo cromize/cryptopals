@@ -2,7 +2,7 @@
 import sys
 sys.path.append('..')
 from helpers import abort
-from block_crypto import aes_cbc_encrypt, aes_cbc_decrypt
+from block_crypto import aes_cbc_encrypt, aes_cbc_decrypt, pkcs7_pad
 from base64 import b64encode, b64decode
 
 if __name__ == "__main__":
@@ -11,6 +11,7 @@ if __name__ == "__main__":
       plain = f.read().rstrip()
       key = sys.argv[2].encode()
       iv = bytes([int(sys.argv[3])])
+      plain = pkcs7_pad(plain, 16)
       ciphertext = aes_cbc_encrypt(plain, key, iv)
       print(b64encode(ciphertext))
 
