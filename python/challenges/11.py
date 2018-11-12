@@ -23,9 +23,9 @@ def blackbox(plain):
   random_key = aes_get_random_key(16)
   coin_toss = bool(random.getrandbits(1))
   if coin_toss == True:
-    print(appended)
     cipher = aes_ecb_encrypt(16*b"A" + pkcs7_pad(appended, 16) + 16*b"A", random_key)
     print("coin_toss: ECB")
+    print(cipher)
   else:
     random_iv = aes_get_random_key(16)
     cipher = aes_cbc_encrypt(16*b"A" + pkcs7_pad(appended, 16) + 16*b"A", random_key, random_iv)
@@ -38,14 +38,21 @@ if __name__ == "__main__":
     cipher_file = None
     with open(sys.argv[1], 'rb') as f:
       cipher_file = f.read() 
-    cipher_file = b64decode(cipher_file)
-    blackbox_output = blackbox(cipher_file)
-    print("here", len("Write a function that encrypts data under an unknown key")%16)
-    print("len:", len(blackbox_output))
+      cipher_file = b64decode(cipher_file)
+
+    # dup. block string gen
+    dup = 16*b"A"
+    real_plain = b"Write a function that encrypts data under an unknown key"
+    blackbox_input = 2*dup + real_plain + 1*dup
+    print("real_plain:", len(real_plain))
+
+    blackbox_output = blackbox(blackbox_input)
+    print("cipher_len:", len(blackbox_output))
     print()
 
     # predict
-    dup_count = aes_ecb_detect(blackbox_output)
+    #dup_count = aes_ecb_detect(blackbox_output)
+    dup_count = aes_ecb_detect(cipher_file)
     print(dup_count)
 
   else:

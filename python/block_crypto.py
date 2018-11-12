@@ -17,13 +17,15 @@ def aes_ecb_decrypt(ciphertext, key):
   decryptor = cipher.decryptor()
   return decryptor.update(ciphertext) 
 
-# return count of duplicate blocks == ecb mode
+# return the count of duplicate blocks == ecb mode
 def aes_ecb_detect(cipher):
   # divide blocks
   blocks = [cipher[i:i+16] for i in range(0, len(cipher), 16)]
   counter = Counter(blocks)
   # sorted blocks by occurrence, most occurred at [0]
   duplicate_count = counter.most_common()[0][1]
+  if duplicate_count <= 1:
+    duplicate_count = 0
   return duplicate_count
 
 # **** CBC mode ****
