@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import random
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.backends import default_backend
 from collections import Counter
@@ -18,6 +19,7 @@ def aes_ecb_decrypt(ciphertext, key):
   return decryptor.update(ciphertext) 
 
 # return the count of duplicate blocks == ecb mode
+# works for min. 3 same blocks
 def aes_ecb_detect(cipher):
   # divide blocks
   blocks = [cipher[i:i+16] for i in range(0, len(cipher), 16)]
@@ -48,6 +50,18 @@ def aes_cbc_decrypt(ciphertext, key, iv):
     iv = block 
     plaintext += plain_block
   return plaintext
+
+# return 1 for ECB guess, return 0 for CBC or undecidable mode
+def aes_mode_oracle(cipher):
+  dup_count = aes_ecb_detect(cipher)
+  if dup_count >= 2:
+    return 1
+  else:
+    return 0
+
+def get_random_bytes(size):
+  key = b"".join((bytes([random.randrange(1, 256)]) for x in range(size)))
+  return key
   
 def pkcs7_pad(text, size):
   if len(text) < size:

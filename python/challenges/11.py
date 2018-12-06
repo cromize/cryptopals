@@ -2,58 +2,41 @@
 import sys
 import random
 sys.path.append('..')
-from block_crypto import aes_ecb_encrypt, aes_ecb_decrypt, aes_cbc_encrypt, aes_cbc_decrypt, aes_ecb_detect, pkcs7_pad
+from block_crypto import aes_ecb_encrypt, aes_ecb_decrypt, aes_cbc_encrypt, aes_cbc_decrypt, aes_ecb_detect, pkcs7_pad, get_random_bytes, aes_mode_oracle
 from base64 import b64decode, b64encode
 from helpers import abort
 
-def aes_get_random_key(size):
-  key = b"".join((bytes([random.randrange(1, 256)]) for x in range(size)))
-  return key
-
-def aes_mode_oracle(cipher):
-  pass
-
 def blackbox(plain):
   append = random.randrange(5, 11)
-  appended = aes_get_random_key(append)
+  appended = get_random_bytes(append)
   appended += plain
   append = random.randrange(5, 11)
-  appended += aes_get_random_key(append)
+  appended += get_random_bytes(append)
   
-  random_key = aes_get_random_key(16)
+  random_key = get_random_bytes(16)
   coin_toss = bool(random.getrandbits(1))
   if coin_toss == True:
-    cipher = aes_ecb_encrypt(16*b"A" + pkcs7_pad(appended, 16) + 16*b"A", random_key)
+    cipher = aes_ecb_encrypt(pkcs7_pad(appended, 16), random_key)
     print("coin_toss: ECB")
-    print(cipher)
   else:
-    random_iv = aes_get_random_key(16)
-    cipher = aes_cbc_encrypt(16*b"A" + pkcs7_pad(appended, 16) + 16*b"A", random_key, random_iv)
+    random_iv = get_random_bytes(16)
+    cipher = aes_cbc_encrypt(pkcs7_pad(appended, 16), random_key, random_iv)
     print("coin_toss: CBC")
-  return cipher
+  return cipher, coin_toss
   
 if __name__ == "__main__":
   if len(sys.argv) == 2:
-    # generate
-    cipher_file = None
+    test_file = None
     with open(sys.argv[1], 'rb') as f:
-      cipher_file = f.read() 
-      cipher_file = b64decode(cipher_file)
+      test_file = f.read()
 
-    # dup. block string gen
-    dup = 16*b"A"
-    real_plain = b"Write a function that encrypts data under an unknown key"
-    blackbox_input = 2*dup + real_plain + 1*dup
-    print("real_plain:", len(real_plain))
-
-    blackbox_output = blackbox(blackbox_input)
-    print("cipher_len:", len(blackbox_output))
-    print()
-
-    # predict
-    #dup_count = aes_ecb_detect(blackbox_output)
-    dup_count = aes_ecb_detect(cipher_file)
-    print(dup_count)
-
+    blackbox_output, coin_toss = blackbox(test_file)
+    guessed_mode = aes_mode_oracle(blackbox_output)
+    if guessed_mode:
+      print("mode: ECB")
+    else:
+      print("mode: CBC")
+    if coin_toss != guessed_mode:
+      print("FAIL: modes doesn't match!")
   else:
-    abort(f'{sys.argv[0]}: [-d] filename password iv')
+    abort(f'{sys.argv[0]}: filename')
