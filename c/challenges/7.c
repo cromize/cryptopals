@@ -7,6 +7,9 @@
 #include "../helpers.h"
 #include "../hex2base64.h"
 
+// osx command to build
+//gcc -I/usr/local/Cellar/openssl/1.0.2p/include 7.c -L/usr/local/Cellar/openssl/1.0.2p/lib/ -lssl -lcrypto ../crack_multibyte_xor.c ../helpers.c ../hex2base64.c ../crack_singlebyte_xor.c
+
 void handleErrors() {
   ERR_print_errors_fp(stderr);
   abort();
@@ -79,6 +82,11 @@ int main(int argc, char** argv) {
 
   // encrypt
   if (argc == 3) {
+    if (strcmp(argv[1], "-d") == 0) {
+      printf("%s\n", "AES-128 ECB encrypt/decrypt tool");
+      printf("%s\n", "supply input file and password (-d for decryption)");
+      exit(0);
+    }
     FILE* fp = fopen(argv[1], "rb");
     if (!fp) return -1;
 
