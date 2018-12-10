@@ -29,7 +29,7 @@ def gen_identical_bytes(blocksize):
 
 def make_dictionary(template):
   dictionary = dict()
-  for x in string.ascii_uppercase + string.ascii_lowercase:
+  for x in string.printable:
     cipher = blackbox(template + x.encode(), b64decode(to_append), key)
     dictionary[template + x.encode()] = cipher[0:16]
   return dictionary
@@ -43,19 +43,18 @@ def match_dictionary(cipher, dictionary):
         return k.decode()
 
 # byte at a time decryption
-def ecb_crack_block(blocksize):
+def ecb_crack_block(to_append_plain, blocksize):
   matches = "" 
-  for i in range(1, blocksize):
-    blackbox_template = gen_identical_bytes(blocksize - i) + matches.encode()
-    cipher = blackbox(blackbox_template, b64decode(to_append)[i-1:], key)
-    dictionary = make_dictionary(blackbox_template)
+  for i in range(1, blocksize+1):
+    template = gen_identical_bytes(blocksize - i) + matches.encode()
+    cipher = blackbox(template, to_append_plain[i-1:], key)
+    dictionary = make_dictionary(template)
     match = match_dictionary(cipher, dictionary)
     try:
       matches += match[-1:]
     except Exception:
-      matches += " "
       pass
-  print(f'matches: {matches}, len: {len(matches)}')
+  return matches
   
 if __name__ == "__main__":
   if len(sys.argv) == 1:
@@ -65,7 +64,14 @@ if __name__ == "__main__":
     print("block size:", blocksize)
     print("is ECB:", is_ecb)
 
-    ecb_crack_block(blocksize)
+    cracked = ""
+    plain_blocks = (b64decode(to_append)[i:i+16] for i in range(0, len(b64decode(to_append)), 16))
+    for block in plain_blocks:
+      cracked += ecb_crack_block(block, blocksize)
+
+    print(cracked)
+    print("plain len: ", len(b64decode(to_append)))
+    print("cracked len: ", len(cracked))
 
   else:
     abort(f'{sys.argv[0]}: filename')
