@@ -29,18 +29,16 @@ def gen_identical_bytes(blocksize):
 
 def make_dictionary(template):
   dictionary = dict()
-  for x in string.printable:
-    cipher = blackbox(template + x.encode(), b64decode(to_append), key)
-    dictionary[template + x.encode()] = cipher[0:16]
+  for x in range(256):
+    cipher = blackbox(template + chr(x).encode(), b64decode(to_append), key)
+    dictionary[template + chr(x).encode()] = cipher[0:16]
   return dictionary
 
 def match_dictionary(cipher, dictionary):
-  div = (cipher[i:i+16] for i in range(0, len(cipher), 1))
   block = cipher[0:16]
-  for block in div:
-    for k, v in dictionary.items():
-      if block == v:
-        return k.decode()
+  for k, v in dictionary.items():
+    if block == v:
+      return k.decode()
 
 # byte at a time decryption
 def ecb_crack_block(to_append_plain, blocksize):
@@ -63,6 +61,7 @@ if __name__ == "__main__":
 
     print("block size:", blocksize)
     print("is ECB:", is_ecb)
+    print()
 
     cracked = ""
     plain_blocks = (b64decode(to_append)[i:i+16] for i in range(0, len(b64decode(to_append)), 16))
