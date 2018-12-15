@@ -10,13 +10,24 @@ def aes_ecb_encrypt(plaintext, key):
   backend = default_backend()
   cipher = Cipher(algorithms.AES(key), modes.ECB(), backend=backend)
   encryptor = cipher.encryptor()
-  return encryptor.update(plaintext)
+
+  ciphertext = b""
+  plain_div = (plaintext[i:i+32] for i in range(0, len(plaintext), 32))
+  for plain_block in plain_div:
+    # pkcs7 pad, then encrypt
+    ciphertext += encryptor.update(pkcs7_pad(plain_block, 32))
+  return ciphertext + encryptor.finalize()
 
 def aes_ecb_decrypt(ciphertext, key):
   backend = default_backend()
   cipher = Cipher(algorithms.AES(key), modes.ECB(), backend=backend)
   decryptor = cipher.decryptor()
-  return decryptor.update(ciphertext) 
+
+  plaintext = b""
+  cipher_div = (ciphertext[i:i+32] for i in range(0, len(ciphertext), 32))
+  for cipher_block in cipher_div:
+    plaintext += decryptor.update(ciphertext) 
+  return plaintext + decryptor.finalize()
 
 # return the count of duplicate blocks == ecb mode
 # works for min. 3 same blocks
@@ -68,6 +79,6 @@ def pkcs7_pad(text, size):
     left = size - len(text)
   else:
     left = len(text) % size 
-  text += b'\x04' * left
+  text += ('%b'.encode() % bytes([left])) * left
   return text
 
