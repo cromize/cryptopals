@@ -12,10 +12,12 @@ def aes_ecb_encrypt(plaintext, key):
   encryptor = cipher.encryptor()
 
   ciphertext = b""
-  plain_div = (plaintext[i:i+32] for i in range(0, len(plaintext), 32))
+  plain_div = (plaintext[i:i+16] for i in range(0, len(plaintext), 16))
   for plain_block in plain_div:
     # pkcs7 pad, then encrypt
-    ciphertext += encryptor.update(pkcs7_pad(plain_block, 32))
+    ciphertext += encryptor.update(pkcs7_pad(plain_block, 16))
+    #print(ciphertext)
+    #print(aes_ecb_decrypt(ciphertext, key))
   return ciphertext + encryptor.finalize()
 
 def aes_ecb_decrypt(ciphertext, key):
@@ -24,7 +26,7 @@ def aes_ecb_decrypt(ciphertext, key):
   decryptor = cipher.decryptor()
 
   plaintext = b""
-  cipher_div = (ciphertext[i:i+32] for i in range(0, len(ciphertext), 32))
+  cipher_div = (ciphertext[i:i+16] for i in range(0, len(ciphertext), 16))
   for cipher_block in cipher_div:
     plaintext += decryptor.update(ciphertext) 
   return plaintext + decryptor.finalize()

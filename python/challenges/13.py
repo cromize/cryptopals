@@ -35,7 +35,6 @@ def encrypt_profile(profile):
   password = b"PABCDEFABCDEFGHJ" #get_random_bytes(16)
   buf = serialize(profile)
   cipher_prof = aes_ecb_encrypt(buf.encode(), password)
-  plain_prof = aes_ecb_decrypt(cipher_prof, password)
   return cipher_prof
 
 def decrypt_profile(profile):
@@ -44,15 +43,21 @@ def decrypt_profile(profile):
 if __name__ == "__main__":
   password = b"PABCDEFABCDEFGHJ" #get_random_bytes(16)
   if len(sys.argv) == 1:
-    from block_crypto import pkcs7_pad
-    print(pkcs7_pad(b"aaaa", 8))
-    sys.exit(0)
     #print(parse(test_str))
     profile = profile_for("foo@bar.com")
-    #print(serialize(profile))
+    ser_profile = serialize(profile)
+    print(ser_profile)
+    print("len:", len(ser_profile))
+    print()
     cipher_profile = encrypt_profile(profile)
+    print(cipher_profile)
+    print("len:", len(cipher_profile))
+    print()
     # TODO: decrypt doesn't work yet
-    print(aes_ecb_decrypt(cipher_profile, password))
+    decrypted = aes_ecb_decrypt(cipher_profile, password)
+    print(decrypted)
+    print("len:", len(decrypted))
+    print()
   
   else:
     abort(f'{sys.argv[0]}: filename')
