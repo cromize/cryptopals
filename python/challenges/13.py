@@ -44,7 +44,7 @@ if __name__ == "__main__":
   password = b"PABCDEFABCDEFGHJ" #get_random_bytes(16)
   if len(sys.argv) == 1:
     #print(parse(test_str))
-    profile = profile_for("foo@bar.com")
+    profile = profile_for("foo@bar.comfoo@bar.comfoo@bar.comfoo@bar.comfoo@bar.comfoo@bar.comfoo@bar.comfoo@bar.comfoo@bar.comfoo@bar.com")
     ser_profile = serialize(profile)
     print(ser_profile)
     print("len:", len(ser_profile))

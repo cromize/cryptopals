@@ -16,8 +16,6 @@ def aes_ecb_encrypt(plaintext, key):
   for plain_block in plain_div:
     # pkcs7 pad, then encrypt
     ciphertext += encryptor.update(pkcs7_pad(plain_block, 16))
-    #print(ciphertext)
-    #print(aes_ecb_decrypt(ciphertext, key))
   return ciphertext + encryptor.finalize()
 
 def aes_ecb_decrypt(ciphertext, key):
@@ -26,9 +24,10 @@ def aes_ecb_decrypt(ciphertext, key):
   decryptor = cipher.decryptor()
 
   plaintext = b""
+  print("ciphertext len:", len(ciphertext))
   cipher_div = (ciphertext[i:i+16] for i in range(0, len(ciphertext), 16))
   for cipher_block in cipher_div:
-    plaintext += decryptor.update(ciphertext) 
+    plaintext += decryptor.update(cipher_block) 
   return plaintext + decryptor.finalize()
 
 # return the count of duplicate blocks == ecb mode
