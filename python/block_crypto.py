@@ -24,11 +24,12 @@ def aes_ecb_decrypt(ciphertext, key):
   decryptor = cipher.decryptor()
 
   plaintext = b""
-  print("ciphertext len:", len(ciphertext))
   cipher_div = (ciphertext[i:i+16] for i in range(0, len(ciphertext), 16))
   for cipher_block in cipher_div:
-    plaintext += decryptor.update(cipher_block) 
-  return plaintext + decryptor.finalize()
+    print(decryptor.update(cipher_block))
+    plaintext += decryptor.update(cipher_block)
+  print()
+  return pkcs7_unpad(plaintext + decryptor.finalize(), 16)
 
 # return the count of duplicate blocks == ecb mode
 # works for min. 3 same blocks
@@ -83,3 +84,8 @@ def pkcs7_pad(text, size):
   text += ('%b'.encode() % bytes([left])) * left
   return text
 
+def pkcs7_unpad(text, size):
+  if len(text) == size:
+    return text
+  pad_len = text[-1]
+  return text[:-pad_len]
