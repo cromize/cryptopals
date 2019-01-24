@@ -5,14 +5,12 @@ sys.path.append('..')
 from helpers import abort
 from block_crypto import aes_ecb_encrypt, aes_ecb_decrypt, get_random_bytes, pkcs7_unpad
 
-test_str = "foo=bar&baz=qux&zap=zazzle"
-
 def parse(input_str):
   obj = dict()
-  parse_gen = (x for x in input_str.split(b"&")) 
-  for token in parse_gen:
-    k = token.split(b"=")[0]
-    v = token.split(b"=")[1]
+  items = (x for x in input_str.split(b"&")) 
+  for item in items:
+    k = item.split(b"=")[0]
+    v = item.split(b"=")[1]
     obj[k] = v
   return obj
 
@@ -27,7 +25,7 @@ def profile_for(input_str):
     raise Exception("input cannot contain & or = symbol")
   profile = dict()
   profile["email"] = input_str
-  profile["uid"] = uuid.uuid4().bytes[0]
+  profile["uid"] = 10
   profile["role"] = "user"
   return profile
 
@@ -38,12 +36,14 @@ def encrypt_profile(profile, password):
 
 def decrypt_profile(profile, password):
   decrypted = aes_ecb_decrypt(profile, password)
-  return decrypted
+  plain_prof = parse(decrypted)
+  return plain_prof
 
-def create_aes_block(plain, password):
+def create_aes_ecb_block(plain, password):
   # first block contains garbage
   # second block contains our stuff
-  offset_block = profile_for(10*"a" + "admin" + 11*"\x0b")
+  pad_len = 16 - len(plain)
+  offset_block = profile_for(10*"a" + plain + pad_len*chr(pad_len))
   encrypted = encrypt_profile(offset_block, password)
   cipher_blocks = [encrypted[i:i+16] for i in range(0, len(encrypted), 16)]
 
@@ -53,35 +53,23 @@ def create_aes_block(plain, password):
 if __name__ == "__main__":
   password = get_random_bytes(16)
   if len(sys.argv) == 1:
-    while 1:
-      try:
-        target_prof = profile_for("foooo@bar.com")
-        print(target_prof)
+    target_prof = profile_for(5*"o" + "@bar.com")
+    cipher_prof = encrypt_profile(target_prof, password)
+    admin_block = create_aes_ecb_block("admin", password)
 
-        cipher_prof = encrypt_profile(target_prof, password)
+    # replace 'user' with 'admin'
+    cipher_blocks = [cipher_prof[i:i+16] for i in range(0, len(cipher_prof), 16)]
+    cipher_blocks[2] = admin_block
+    changed_prof = b"".join((x for x in cipher_blocks))
 
-        plain_prof = decrypt_profile(cipher_prof, password)
-        print("decrypted:", plain_prof)
-        print("len:", len(plain_prof))
-        print()
+    decrypted_prof = decrypt_profile(changed_prof, password) 
 
-        print("*** admin block ***")
-        admin_block = create_aes_block("admin", password)
-        print("admin block:", admin_block)
+    print("*** original ***")
+    print(target_prof)
+    print("\n*** cipher  ***")
+    print(cipher_prof)
+    print("\n*** modified ***")
+    print(decrypted_prof)
 
-        cipher_blocks = [cipher_prof[i:i+16] for i in range(0, len(cipher_prof), 16)]
-        cipher_blocks[2] = admin_block
-        changed_prof = b"".join((x for x in cipher_blocks))
-        print(changed_prof)
-        print()
-
-        decrypted_prof = decrypt_profile(changed_prof, password) 
-        print(decrypted_prof)
-        parsed_prof = parse(decrypted_prof)
-        print(parsed_prof)
-        break
-      except:
-        pass
-  
   else:
     abort(f'{sys.argv[0]}: filename')
