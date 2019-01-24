@@ -11,14 +11,14 @@ to_append = "Um9sbGluJyBpbiBteSA1LjAKV2l0aCBteSByYWctdG9wIGRvd24gc28gbXkgaGFpciB
 # key must be the same every invocation! 
 key = get_random_bytes(16)
 
-def blackbox(plaintext, append, key):
+def oracle(plaintext, append, key):
   to_cipher = plaintext + append
   cipher = aes_ecb_encrypt(to_cipher, key)
   return cipher
 
 def ecb_determine_blocksize():
   for blocksize in range(32):
-    cipher = blackbox(2 * blocksize * b"A", b64decode(to_append), key)
+    cipher = oracle(2 * blocksize * b"A", b64decode(to_append), key)
     dup_count = aes_ecb_detect(cipher)
     if dup_count:
       return blocksize
@@ -30,7 +30,7 @@ def gen_identical_bytes(blocksize):
 def make_dictionary(template):
   dictionary = dict()
   for x in range(256):
-    cipher = blackbox(template + chr(x).encode(), b64decode(to_append), key)
+    cipher = oracle(template + chr(x).encode(), b64decode(to_append), key)
     dictionary[template + chr(x).encode()] = cipher[0:16]
   return dictionary
 
@@ -45,7 +45,7 @@ def ecb_crack_block(to_append_plain, blocksize):
   matches = "" 
   for i in range(1, blocksize+1):
     template = gen_identical_bytes(blocksize - i) + matches.encode()
-    cipher = blackbox(template, to_append_plain[i-1:], key)
+    cipher = oracle(template, to_append_plain[i-1:], key)
     dictionary = make_dictionary(template)
     match = match_dictionary(cipher, dictionary)
     try:
@@ -57,7 +57,7 @@ def ecb_crack_block(to_append_plain, blocksize):
 if __name__ == "__main__":
   if len(sys.argv) == 1:
     blocksize = ecb_determine_blocksize()
-    is_ecb = aes_mode_oracle(blackbox(32*b"a", b64decode(to_append), key))
+    is_ecb = aes_mode_oracle(oracle(32*b"a", b64decode(to_append), key))
 
     print("block size:", blocksize)
     print("is ECB:", is_ecb)
