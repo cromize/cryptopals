@@ -2,11 +2,11 @@
 import sys
 import string
 sys.path.append('..')
-from helpers import abort
+from helpers import abort, gen_identical_bytes
 from block_crypto import aes_ecb_encrypt, aes_ecb_decrypt, get_random_bytes, aes_ecb_detect, aes_mode_oracle
 from base64 import b64decode, b64encode
 
-to_append = "Um9sbGluJyBpbiBteSA1LjAKV2l0aCBteSByYWctdG9wIGRvd24gc28gbXkgaGFpciBjYW4gYmxvdwpUaGUgZ2lybGllcyBvbiBzdGFuZGJ5IHdhdmluZyBqdXN0IHRvIHNheSBoaQpEaWQgeW91IHN0b3A/IE5vLCBJIGp1c3QgZHJvdmUgYnkK"
+to_append = b"Um9sbGluJyBpbiBteSA1LjAKV2l0aCBteSByYWctdG9wIGRvd24gc28gbXkgaGFpciBjYW4gYmxvdwpUaGUgZ2lybGllcyBvbiBzdGFuZGJ5IHdhdmluZyBqdXN0IHRvIHNheSBoaQpEaWQgeW91IHN0b3A/IE5vLCBJIGp1c3QgZHJvdmUgYnkK"
 
 # key must be the same every invocation! 
 key = get_random_bytes(16)
@@ -23,9 +23,6 @@ def ecb_determine_blocksize():
     if dup_count:
       return blocksize
   return 0
-
-def gen_identical_bytes(blocksize):
-  return b'A' * blocksize
 
 def make_dictionary(template):
   dictionary = dict()
