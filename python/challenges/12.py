@@ -2,7 +2,7 @@
 import sys
 import string
 sys.path.append('..')
-from helpers import abort, gen_identical_bytes
+from helpers import abort, generate_template
 from block_crypto import aes_ecb_encrypt, aes_ecb_decrypt, get_random_bytes, aes_ecb_detect, aes_mode_oracle
 from base64 import b64decode, b64encode
 
@@ -41,7 +41,7 @@ def match_dictionary(cipher, dictionary):
 def ecb_crack_block(to_append_plain, blocksize):
   matches = "" 
   for i in range(1, blocksize+1):
-    template = gen_identical_bytes(blocksize - i) + matches.encode()
+    template = generate_template(16*b"a", blocksize - i) + matches.encode()
     cipher = oracle(template, to_append_plain[i-1:], key)
     dictionary = make_dictionary(template)
     match = match_dictionary(cipher, dictionary)

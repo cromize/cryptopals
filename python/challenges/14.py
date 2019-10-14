@@ -40,21 +40,19 @@ def oracle(plaintext, append, key):
 # byte at a time decryption with an offset
 def ecb_crack_block(to_append_plain, blocksize, cracked):
   matches = b""
-  success_times = 0
   i = 1
 
   # aes padding block
   global pad_block, check_block, sentinel_block
-  pad_block = craft_aes_block(16*b"\x10")
-  check_block = craft_aes_block(16*b"p")
-  sentinel_block = craft_aes_block(b"abcdefghijklmnop")
+  pad_block = craft_aes_block_slower(16*b"\x10")
+  check_block = craft_aes_block_slower(16*b"p")
+  sentinel_block = craft_aes_block_slower(b"abcdefghijklmnop")
 
   template = generate_template(cracked[-16:], blocksize - i)
 
   while i <= blocksize: 
     # TODO: we could pre-generate cipher for each of 16 offsets
     cipher = generate_even_cipher(template)
-
     dictionary = make_dictionary(template + matches)
 
     # match the dictionary
@@ -80,44 +78,30 @@ def generate_even_cipher(template):
     cipher_blocks = [cipher[i:i+16] for i in range(0, len(cipher), 16)]
   return cipher
 
-# TODO: let's think about this more...
 def make_dictionary(template):
   dictionary = dict()
   xx = string.printable.encode() + b"\x01"
   for x in xx:
-    #sentinel = make_offset_sentinel_pattern()
-    cipher_block = better_craft_aes_block(template + bytes([x]))
-    #cipher = oracle(template + chr(x).encode(), b64decode(to_append), key)
-    #sentinel_idx, dup_cnt, offset = find_sentinel(cipher)
-    #print(aes_ecb_decrypt(cipher, key)[(16*sentinel_idx):(16*sentinel_idx)+16])
-    # dict_key for first block only?
-    #dict_key = ((offset-1) * b"p" + (16-offset) * b"X")#[:-1]
-    #print(dict_key, len(dict_key), offset)
+    cipher_block = craft_aes_block(template + bytes([x]))
     dictionary[template + bytes([x])] = cipher_block
   return dictionary
 
 def match_dictionary(cipher, dictionary, cracked_len):
-  #cipher = aes_ecb_decrypt(cipher, key)
   cipher_blocks = [cipher[cracked_len+i:cracked_len+i+16] for i in range(0, len(cipher), 16)]
-  #print(cipher_blocks)
-  #print(block)
-  #print(aes_ecb_decrypt(block, key))
-  #print(dictionary)
-  #sys.exit(0)
   for k, v in dictionary.items():
     if v in cipher_blocks:
       return k.decode()
 
-# TODO: looking for known sentinel block could be better than looking for most common block
 # when we want to crack the last byte of a block, we need to check for one more of the same block, because it's included in target we want to crack
-def craft_aes_block(plain):
+def craft_aes_block_slower(plain):
   block_count = 0
   while not (block_count == 4 or block_count == 5):
-   cipher = oracle(plain + 16*b"a" + plain + 16*b"b" + plain + 16*b"c" + plain + 16*b"d", b64decode(to_append), key)
+   cipher = oracle(4*plain, b64decode(to_append), key)
    common, block_count = find_most_common_block(cipher)
   return common
 
-def better_craft_aes_block(plain):
+# looking for known sentinel block is faster than looking for most common block
+def craft_aes_block(plain):
   # if last cipher block matches our pad_block, we know that offset is zero
   cipher_blocks = []
   cipher = b""
@@ -129,49 +113,12 @@ def better_craft_aes_block(plain):
   return target
 
 def find_most_common_block(ciphertext):
-  # verbose stuff
-  #plain = aes_ecb_decrypt(ciphertext, key)
-  #plain_blocks = [plain[i:i+16] for i in range(0, len(plain), 16)]
   cipher_blocks = [ciphertext[i:i+16] for i in range(0, len(ciphertext), 16)]
   counter = Counter(cipher_blocks)
-  #plain_counter = Counter(plain_blocks)
-  #print(plain_counter.most_common())
   return counter.most_common()[0]
 
-# find the most common block, get idx, duplicate count and offset from that
-def find_sentinel(ciphertext):
-  sentinel_cipher = find_most_common_block(ciphertext)
-  last_sentinel_idx = 0
-  for idx, block in enumerate(cipher_blocks):
-    if block == sentinel_cipher:
-      #print("FOUND")
-      #print(block)
-      last_sentinel_idx = idx
-  
-  occurrence = [counter.most_common()[idx][1] for idx in range(len(counter.most_common()))]
-  idx_start = 0
-  for idx, i in enumerate(occurrence):
-    dup_cnt = counter.most_common()[idx][1]
-    if idx_start == 0 and idx != 1:
-      idx_start = idx
-    if (i % 2.0) == 0:
-      if dup_cnt >= 32:
-        return last_sentinel_idx + 1, dup_cnt, idx - idx_start
-      else:
-        return last_sentinel_idx + 1, dup_cnt, idx - idx_start + 1
-  return None, None, None
-
-def make_offset_sentinel_pattern():
-  pattern = b""
-  for idx, i in enumerate(range(4, 36, 2)):
-    pattern += i * 16 * string.ascii_lowercase[idx].encode() + b"Z"
-  return pattern[:-1]
-  
 if __name__ == "__main__":
   if len(sys.argv) == 1:
-    sentinel_sled = make_offset_sentinel_pattern()
-    print("sentinel pattern len:", len(sentinel_sled))
-
     # lets crack the blocks
     cracked = b""
     plain_blocks = (b64decode(to_append)[i:i+16] for i in range(0, len(b64decode(to_append)), 16))
