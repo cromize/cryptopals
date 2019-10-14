@@ -26,5 +26,5 @@ def hamming_dst(str1, str2):
       val &= val-1
   return bcount
 
-def gen_identical_bytes(blocksize):
-  return b'X' * blocksize
+def generate_template(template, blocksize=0):
+  return template[len(template)-blocksize:]
