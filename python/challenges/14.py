@@ -31,6 +31,8 @@ pad_block = b""
 check_block = b""
 sentinel_block = b""
 
+even_cipher_cache = dict()
+
 def oracle(plaintext, append, key):
   random_prefix = get_random_bytes(random.randrange(1, 48))
   to_cipher = random_prefix + plaintext + append
@@ -49,10 +51,10 @@ def ecb_crack_block(to_append_plain, blocksize, cracked):
   sentinel_block = craft_aes_block_slower(b"abcdefghijklmnop")
 
   template = generate_template(cracked[-16:], blocksize - i)
+  it = generate_template(16*b"X", blocksize - i)
 
   while i <= blocksize: 
-    # TODO: we could pre-generate cipher for each of 16 offsets
-    cipher = generate_even_cipher(template)
+    cipher = generate_even_cipher(it)
     dictionary = make_dictionary(template + matches)
 
     # match the dictionary
@@ -61,6 +63,7 @@ def ecb_crack_block(to_append_plain, blocksize, cracked):
       print(matches)
       i += 1
       template = generate_template(cracked[-16:], blocksize - i)
+      it = generate_template(16*b"X", blocksize - i)
     except TypeError as e:
       # all done
       if matches[-1] == 1:
@@ -71,11 +74,18 @@ def ecb_crack_block(to_append_plain, blocksize, cracked):
 # generates cipher that has even length
 def generate_even_cipher(template):
   # if last cipher block matches our pad_block, we know that offset is zero
+  if template in even_cipher_cache:
+    return even_cipher_cache[template]
+
   cipher_blocks = []
   cipher = b""
   while check_block not in cipher_blocks:
     cipher = oracle(16*b"p" + template, b64decode(to_append), key)
     cipher_blocks = [cipher[i:i+16] for i in range(0, len(cipher), 16)]
+
+  # memoize
+  if template not in even_cipher_cache:
+    even_cipher_cache[template] = cipher  
   return cipher
 
 def make_dictionary(template):
