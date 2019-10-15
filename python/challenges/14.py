@@ -8,45 +8,39 @@ from helpers import abort, generate_template
 from collections import Counter
 from base64 import b64decode, b64encode
 
-# *** we need to somehow align blocks ***
-# old approach:
-#   1. encrypt our input with blocks that help us determine the offset (too many blocks!)
-#   2. brute force blocks until offset is zero (very slow!)
-#   3. do one byte at a time crack from challenge 12.py
+# *** we need to offset align blocks ***
+#  1. forge a cipherblock 16*b"p" for detecting even ciphertext
+#  2. forge a cipherblock b"abcdefghijklmnop" for fast detection of zero offset cipher
+#  3. generate target ciphertext until offset is zero using forged cipherblock
+#  4. do one-byte at a time crack from challenge 12.py
 
 # note: we need to remove the first byte from template for
 #       every next byte we are going to crack
 
-# TODO: we can memoize aes encryption of offset pattern block for speed up
-# TODO: let's also put sentinel more blocks behind unknown string, so we can precompute all characters and not deal with offsets
+# we memoize aes encryption of offset pattern block for speed up
 
-# NOTE: we can abuse the fact that when padding size is 0, whole chunk of block size value is appended.
-#       bruteforcing this last block could give us needed offset, instead of bruteforcing whole text with added blocks for offset detection
-
-to_append = b"Um9sbGluJyBpbiBteSA1LjAKV2l0aCBteSByYWctdG9wIGRvd24gc28gbXkgaGFpciBjYW4gYmxvdwpUaGUgZ2lybGllcyBvbiBzdGFuZGJ5IHdhdmluZyBqdXN0IHRvIHNheSBoaQpEaWQgeW91IHN0b3A/IE5vLCBJIGp1c3QgZHJvdmUgYnkK"
+append = b"Um9sbGluJyBpbiBteSA1LjAKV2l0aCBteSByYWctdG9wIGRvd24gc28gbXkgaGFpciBjYW4gYmxvdwpUaGUgZ2lybGllcyBvbiBzdGFuZGJ5IHdhdmluZyBqdXN0IHRvIHNheSBoaQpEaWQgeW91IHN0b3A/IE5vLCBJIGp1c3QgZHJvdmUgYnkK"
 
 key = get_random_bytes(16)
 
-pad_block = b""
 check_block = b""
 sentinel_block = b""
 
 even_cipher_cache = dict()
 
-def oracle(plaintext, append, key):
+def oracle(plaintext, key):
   random_prefix = get_random_bytes(random.randrange(1, 48))
-  to_cipher = random_prefix + plaintext + append
+  to_cipher = random_prefix + plaintext + b64decode(append)
   cipher = aes_ecb_encrypt(to_cipher, key)
   return cipher
 
 # byte at a time decryption with an offset
-def ecb_crack_block(to_append_plain, blocksize, cracked):
+def ecb_crack_block(blocksize, cracked):
   matches = b""
   i = 1
 
   # aes padding block
-  global pad_block, check_block, sentinel_block
-  pad_block = craft_aes_block_slower(16*b"\x10")
+  global check_block, sentinel_block
   check_block = craft_aes_block_slower(16*b"p")
   sentinel_block = craft_aes_block_slower(b"abcdefghijklmnop")
 
@@ -66,8 +60,7 @@ def ecb_crack_block(to_append_plain, blocksize, cracked):
       it = generate_template(16*b"X", blocksize - i)
     except TypeError as e:
       # all done
-      if matches[-1] == 1:
-        return matches
+      return matches
 
   return matches
 
@@ -80,7 +73,7 @@ def generate_even_cipher(template):
   cipher_blocks = []
   cipher = b""
   while check_block not in cipher_blocks:
-    cipher = oracle(16*b"p" + template, b64decode(to_append), key)
+    cipher = oracle(16*b"p" + template, key)
     cipher_blocks = [cipher[i:i+16] for i in range(0, len(cipher), 16)]
 
   # memoize
@@ -106,7 +99,7 @@ def match_dictionary(cipher, dictionary, cracked_len):
 def craft_aes_block_slower(plain):
   block_count = 0
   while not (block_count == 4 or block_count == 5):
-   cipher = oracle(4*plain, b64decode(to_append), key)
+   cipher = oracle(4*plain, key)
    common, block_count = find_most_common_block(cipher)
   return common
 
@@ -116,7 +109,7 @@ def craft_aes_block(plain):
   cipher_blocks = []
   cipher = b""
   while sentinel_block not in cipher_blocks:
-    cipher = oracle(b"abcdefghijklmnop" + plain, b64decode(to_append), key)
+    cipher = oracle(b"abcdefghijklmnop" + plain, key)
     cipher_blocks = [cipher[i:i+16] for i in range(0, len(cipher), 16)]
     offset = cipher.find(sentinel_block) + 16
     target = cipher[offset:offset+16]
@@ -131,12 +124,8 @@ if __name__ == "__main__":
   if len(sys.argv) == 1:
     # lets crack the blocks
     cracked = b""
-    plain_blocks = (b64decode(to_append)[i:i+16] for i in range(0, len(b64decode(to_append)), 16))
-    for idx, block in enumerate(plain_blocks):
-      if cracked == b"":
-        cracked += ecb_crack_block(block, 16, 16*b"X")
-      else:
-        cracked += ecb_crack_block(block, 16, cracked)
+    while len(cracked) <= len(b64decode(append)):
+      cracked += ecb_crack_block(16, cracked or 16*b"X")
     print("cracked:\n", pkcs7_unpad(cracked).decode())
     
   else:
